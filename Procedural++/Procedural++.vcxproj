@@ -81,7 +81,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\external;C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\external\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\external;C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\external\imgui;C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -108,7 +108,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\external;C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\external\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\external;C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\external\imgui;C:\Users\XxX_DEATH_LORD_1337\Documents\Procedural-\Procedural++\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -119,6 +119,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\pollRotator.c" />
+    <ClCompile Include="src\tgaloader.c" />
+    <ClCompile Include="src\tnm084.c" />
+    <ClCompile Include="src\triangleSoup.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\pollRotator.h" />
+    <ClInclude Include="include\tgaloader.h" />
+    <ClInclude Include="include\tnm084.h" />
+    <ClInclude Include="include\triangleSoup.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

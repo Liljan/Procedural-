@@ -1,0 +1,40 @@
+# Project: GLSLprimer
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe -D__DEBUG__
+CC       = gcc.exe -D__DEBUG__
+WINDRES  = windres.exe
+OBJ      = GLSLprimer.o pollRotator.o tnm084.o triangleSoup.o tgaloader.o
+LINKOBJ  = GLSLprimer.o pollRotator.o tnm084.o triangleSoup.o tgaloader.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -mwindows -L. -mwindows -mconsole -lglfw3 -lopengl32 -g3
+INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
+CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
+BIN      = GLSLprimer.exe
+CXXFLAGS = $(CXXINCS) -g3
+CFLAGS   = $(INCS) -g3 -I.
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+GLSLprimer.o: GLSLprimer.c
+	$(CC) -c GLSLprimer.c -o GLSLprimer.o $(CFLAGS)
+
+pollRotator.o: pollRotator.c
+	$(CC) -c pollRotator.c -o pollRotator.o $(CFLAGS)
+
+tnm084.o: tnm084.c
+	$(CC) -c tnm084.c -o tnm084.o $(CFLAGS)
+
+triangleSoup.o: triangleSoup.c
+	$(CC) -c triangleSoup.c -o triangleSoup.o $(CFLAGS)
+
+tgaloader.o: tgaloader.c
+	$(CC) -c tgaloader.c -o tgaloader.o $(CFLAGS)
