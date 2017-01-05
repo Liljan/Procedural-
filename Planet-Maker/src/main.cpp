@@ -56,13 +56,32 @@ int main() {
 	double lastTime = glfwGetTime() - 0.001;
 	double dT = 0.0;
 
+	// Procedural related variables
+	float amplitude = 1.0f;
+	float lacunarity = 1.0f;
+	int octaves = 6;
+	int seed = 0;
+
+	bool use_perlin = true;
+	bool use_implex = false;
+	bool use_cell = false;
+
 	while (!glfwWindowShouldClose(currentWindow))
 	{
 		glfwPollEvents();
 
 		ImGui_ImplGlfw_NewFrame();
 		{
-			ImGui::Text("Number of Particles");
+			ImGui::Text("Procedural Planet Maker");
+			ImGui::Separator();
+			ImGui::SliderInt("Octaves", &octaves, 1, 6);
+			ImGui::SliderInt("Seed", &seed, -10000, 10000);
+			ImGui::SliderFloat("Lacunarity", &lacunarity, 0.0f, 1.0f);
+			ImGui::SliderFloat("Amplitude", &amplitude, 0.0f, 1.0f);
+
+			if (ImGui::BeginMenu("Procedural method")) {
+				ImGui::Checkbox("Perlin", &use_perlin);
+			}
 		}
 
 		if (dT > 1.0 / 30.0)
