@@ -1,2 +1,2 @@
-# Procedural-
+# Procedural++
 Planet maker in C++ with GLSL.

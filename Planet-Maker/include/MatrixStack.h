@@ -2,13 +2,15 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "GL/glew.h"
+#include <glm/mat4x4.hpp> // glm::mat4
 
 // A linked list implementing a matrix stack
 
 #ifndef MATRIXSTACK_H
 #define MATRIXSTACK_H
 struct Matrix {
-  float m[16];
+  glm::mat4 m;
   Matrix *previous;
 };
 #endif
@@ -25,28 +27,29 @@ public:
 
     // Get the pointer to the topmost (current) matrix array
     float* getCurrentMatrix();
+	glm::mat4* getCurrentMatrixM();
 
     // Set the topmost (current) matrix to the identity matrix
     void init();
 
     // Multiply the topmost (current) matrix with a rotation around X
-    void rotX(float angle);
+    void rotX(float _a);
 
     // Multiply the topmost (current) matrix with a rotation around Y
-    void rotY(float angle);
+    void rotY(float _a);
 
     // Multiply the topmost (current) matrix with a rotation around Z
-    void rotZ(float angle);
+    void rotZ(float _a);
 
-	void rotAxis(float* axis, float a);
+	void rotAxis(glm::vec3* _Axis, float _a);
 
     // Multiply the topmost (current) matrix with a uniform scaling
-    void scale(float s);
+    void scale(float _s);
 
     // Multiply the topmost (current) matrix with a translation
-    void translate(float pos[3]);
+    void translate(glm::vec3* _Position);
 
-	void multiply(float M[]);
+	void multiply(glm::mat4* _M);
 	//void multiply(float **M);
 
     // Add a new level on the stack, making a copy of the topmost matrix
@@ -66,6 +69,6 @@ public:
 
 private:
     // These functions should not be used outside of the class.
-    void matrixMult(float M1[], float M2[], float Mout[]);
-    void matrixPrint(float M[]);
+	void matrixMult(glm::mat4* M1, glm::mat4* M2, glm::mat4* Mout);
+	void matrixPrint(glm::mat4* M);
 };

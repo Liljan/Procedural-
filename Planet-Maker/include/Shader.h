@@ -1,3 +1,4 @@
+#pragma once
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -8,7 +9,6 @@
 #include <string>
 #include <vector>
 
-//! Class for loading, compiling and assembeling shader program.
 class Shader {
 
 public:
@@ -19,8 +19,10 @@ public:
 	~Shader();
 
 	void createShader();
+	void createComputeShader(const char *computeShaderFilePath);
 	void createShader(const char *vertexFilePath, const char *fragmentFilePath);
 	void createShader(const char *vertexFilePath, const char *fragmentFilePath, const char* geometryFilePath);
+	void createTransformShader(const char * vertexFilePath, const char * fragmentFilePath, const char * geometryFilePath);
 
 private:
 	std::string readFile(const char *filePath);
