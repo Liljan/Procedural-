@@ -35,4 +35,3 @@ void main () {
 	vec3 resultLight = ambient + diffuse;// + specular;
 	FragColor = vec4(resultLight, Color.a);
 }
-
