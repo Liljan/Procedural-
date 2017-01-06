@@ -2,11 +2,11 @@
 
 #define M_PI 3.14159265358979323846f
 
-Sphere::Sphere(float x, float y, float z, float _rad)
+Sphere::Sphere(float x, float y, float z, float _rad, int segments)
 {
 	m_position = glm::vec3(x, y, z);
 	m_radius = _rad;
-	createSphere(_rad, 32);
+	createSphere(_rad, segments);
 }
 
 void Sphere::clean() {
@@ -83,7 +83,7 @@ void Sphere::createSphere(float radius, int segments) {
 	// All other vertices:
 	// vsegs-1 latitude rings of hsegs+1 vertices each
 	// (duplicates at texture seam s=0 / s=1)
-	for (j = 0; j<vsegs - 1; j++) { // vsegs-1 latitude rings of vertices
+	for (j = 0; j < vsegs - 1; j++) { // vsegs-1 latitude rings of vertices
 		theta = (double)(j + 1) / vsegs*M_PI;
 		z = cos(theta);
 		R = sin(theta);
@@ -105,14 +105,14 @@ void Sphere::createSphere(float radius, int segments) {
 
 	// The index array: triplets of integers, one for each triangle
 	// Top cap
-	for (i = 0; i<hsegs; i++) {
+	for (i = 0; i < hsegs; i++) {
 		p_indexarray[3 * i] = 0;
 		p_indexarray[3 * i + 1] = 1 + i;
 		p_indexarray[3 * i + 2] = 2 + i;
 	}
 	// Middle part (possibly empty if vsegs=2)
-	for (j = 0; j<vsegs - 2; j++) {
-		for (i = 0; i<hsegs; i++) {
+	for (j = 0; j < vsegs - 2; j++) {
+		for (i = 0; i < hsegs; i++) {
 			base = 3 * (hsegs + 2 * (j*hsegs + i));
 			i0 = 1 + j*(hsegs + 1) + i;
 			p_indexarray[base] = i0;
@@ -125,7 +125,7 @@ void Sphere::createSphere(float radius, int segments) {
 	}
 	// Bottom cap
 	base = 3 * (hsegs + 2 * (vsegs - 2)*hsegs);
-	for (i = 0; i<hsegs; i++) {
+	for (i = 0; i < hsegs; i++) {
 		p_indexarray[base + 3 * i] = m_nverts - 1;
 		p_indexarray[base + 3 * i + 1] = m_nverts - 2 - i;
 		p_indexarray[base + 3 * i + 2] = m_nverts - 3 - i;
@@ -166,8 +166,8 @@ void Sphere::createSphere(float radius, int segments) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexbuffer);
 	// Present our vertex indices to OpenGL
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-		3 * m_ntris*sizeof(GLuint), p_indexarray, GL_STATIC_DRAW);
-	
+		3 * m_ntris * sizeof(GLuint), p_indexarray, GL_STATIC_DRAW);
+
 	// Deactivate (unbind) the VAO and the buffers again.
 	// Do NOT unbind the buffers while the VAO is still bound.
 	// The index buffer is an essential part of the VAO state.

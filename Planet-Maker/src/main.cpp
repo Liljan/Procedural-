@@ -15,6 +15,10 @@ void GLcalls();
 
 static const float M_PI = 3.141592653f;
 
+inline float degree_to_radians(float degree) {
+	return M_PI*degree / 180.0f;
+}
+
 int main() {
 	glfwContext glfw;
 	GLFWwindow* currentWindow = nullptr;
@@ -33,27 +37,11 @@ int main() {
 	if (l_GlewResult != GLEW_OK)
 		std::cout << "glewInit() error." << std::endl;
 
-
 	// Print some info about the OpenGL context...
 	glfw.printGLInfo();
 
-	Shader proceduralShader;
-	proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
-
-	GLint locationP = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
-	GLint locationMV = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
-	GLint locationColor = glGetUniformLocation(proceduralShader.programID, "Color"); // base color of planet
-
-	MatrixStack MVstack; MVstack.init();
-
-	Sphere sphere(0.0f, 0.0f, 0.0f, 1.0f);
-
-	Camera mCamera;
-	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
-	mCamera.update();
-
 	// GUI related variables
-
+	bool show_tooltips = true;
 
 	// Time related variables
 	bool is_paused = false;
@@ -63,20 +51,48 @@ int main() {
 	double dT = 0.0;
 
 	// Procedural related variables
-	float amplitude = 1.0f;
+	float elevation = 0.1f;
+	float amplitude = 0.01f;
 	float lacunarity = 1.0f;
 	int octaves = 6;
 	int seed = 0;
 
-	float color_low[4] = { 0.1f,0.1f,0.1f,1.0f };
-	float color_med[4] = { 0.1f,0.1f,0.1f,1.0f };
-	float color_high[4] = { 0.1f,0.1f,0.1f,1.0f };
+	float color_glow[3] = { 1.0f,1.0f,0.0f };
+	float color_low[3] = { 1.0f,0.1f,0.0f };
+	float color_med[3] = { 0.30f,0.3f,0.30f };
+	float color_high[3] = { 0.05f,0.01f,0.03f };
 
 	bool use_perlin = true;
 	bool use_simplex = false;
 	bool use_cell = false;
 
-	float rotation = 0.0f;
+	// other shite
+	float rotationDegrees = 0.0f;
+	float rotationRadians = 0.0f;
+	float shininess = 50.0f;
+
+	Shader proceduralShader;
+	proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
+
+	GLint locationP = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
+	GLint locationMV = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
+
+	GLint gl_color_glow = glGetUniformLocation(proceduralShader.programID, "color_glow"); // base color of planet
+	GLint gl_color_low = glGetUniformLocation(proceduralShader.programID, "color_low"); // base color of planet
+	GLint gl_color_med = glGetUniformLocation(proceduralShader.programID, "color_med"); // base color of planet
+	GLint gl_color_high = glGetUniformLocation(proceduralShader.programID, "color_high"); // base color of planet
+
+	GLfloat gl_amplitude = glGetUniformLocation(proceduralShader.programID, "amp");
+	GLfloat gl_elevation = glGetUniformLocation(proceduralShader.programID, "elevationModifier");
+	GLint gl_seed = glGetUniformLocation(proceduralShader.programID, "seed");
+
+	MatrixStack MVstack; MVstack.init();
+
+	Sphere sphere(0.0f, 0.0f, 0.0f, 1.0f, 32 * 4);
+
+	Camera mCamera;
+	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
+	mCamera.update();
 
 	// RENDER LOOP \__________________________________________/
 
@@ -89,16 +105,22 @@ int main() {
 			ImGui::Text("Procedural Planet Maker");
 			ImGui::Separator();
 			ImGui::SliderInt("Octaves", &octaves, 1, 6);
-			ImGui::SliderInt("Seed", &seed, -10000, 10000);
+			if (show_tooltips && ImGui::IsItemHovered())
+				ImGui::SetTooltip("The numbers of iterations the procedural method has.");
+
+
+			ImGui::SliderInt("Seed", &seed, 0, 100);
 			ImGui::SliderFloat("Lacunarity", &lacunarity, 0.0f, 1.0f);
 			ImGui::SliderFloat("Amplitude", &amplitude, 0.0f, 1.0f);
+			ImGui::SliderFloat("Elevation", &elevation, 0.0f, 0.2f);
 
 			ImGui::Separator();
 
 			ImGui::Text("Colors");
-			ImGui::ColorEdit4("Low", color_low);
-			ImGui::ColorEdit4("Medium", color_med);
-			ImGui::ColorEdit4("High", color_high);
+			ImGui::ColorEdit3("Glow", color_glow);
+			ImGui::ColorEdit3("Low", color_low);
+			ImGui::ColorEdit3("Medium", color_med);
+			ImGui::ColorEdit3("High", color_high);
 
 			ImGui::Separator();
 
@@ -115,22 +137,26 @@ int main() {
 				ImGui::EndMenu();
 			}
 
-			ImGui::SliderFloat("Rotation", &rotation, 0, 360);
-			// Deg2Rad
+			ImGui::SliderFloat("Rotation", &rotationDegrees, 0, 360);
+			rotationRadians = degree_to_radians(rotationDegrees);
+
+			ImGui::SliderFloat("Shininess", &shininess, 0.0f, 100.0f);
 
 			ImGui::Spacing();
+			ImGui::Checkbox("Show tooltips", &show_tooltips);
+
 			if (ImGui::Button("Reset")) {
 				amplitude = 1.0f;
 				lacunarity = 1.0f;
 				octaves = 6;
 				seed = 0;
 
-				color_low[0] = color_low[1] = color_low[2] = color_low[3] = 1.0f;
-				color_med[0] = color_med[1] = color_med[2] = color_med[3] = 1.0f;
-				color_high[0] = color_high[1] = color_high[2] = color_med[3] = 1.0f;
+				color_low[0] = color_low[1] = color_low[2] = 1.0f;
+				color_med[0] = color_med[1] = color_med[2] = 1.0f;
+				color_high[0] = color_high[1] = color_high[2] = 1.0f;
 
 				use_perlin = true;
-				rotation = 0.f;
+				rotationDegrees = 0.f;
 			}
 
 		}
@@ -144,6 +170,8 @@ int main() {
 			dT = glfwGetTime() - lastTime;
 		}
 
+		rotationRadians += 
+
 		//glfw input handler
 		inputHandler(currentWindow, dT);
 
@@ -152,7 +180,7 @@ int main() {
 			if (!fpsResetBool)
 			{
 				fpsResetBool = true;
-				glfwSetCursorPos(currentWindow, 960, 540);
+				glfwSetCursorPos(currentWindow, 1280 / 2, 720 / 2);
 			}
 
 			mCamera.fpsCamera(currentWindow, dT);
@@ -172,11 +200,20 @@ int main() {
 		MVstack.multiply(mCamera.getTransformM());
 
 		MVstack.push();
-		float color[] = { 1.f, 1.0f, 1.f, 1.f };
-		glUniform4fv(locationColor, 1, &color[0]);
+		//glUniform4fv(gl_color_low, 1, &color_low[0]);
 		MVstack.translate(sphere.getPosition());
-		MVstack.rotY(rotation);
+		MVstack.rotY(rotationRadians);
 		glUniformMatrix4fv(locationMV, 1, GL_FALSE, MVstack.getCurrentMatrix());
+
+		glUniform1f(gl_amplitude, amplitude);
+		glUniform1f(gl_elevation, elevation);
+		glUniform1i(gl_seed, seed);
+
+		glUniform3fv(gl_color_glow, 1, &color_glow[0]);
+		glUniform3fv(gl_color_low, 1, &color_low[0]);
+		glUniform3fv(gl_color_med, 1, &color_med[0]);
+		glUniform3fv(gl_color_high, 1, &color_high[0]);
+
 		sphere.render();
 		MVstack.pop();
 

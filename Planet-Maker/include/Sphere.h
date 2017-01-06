@@ -6,7 +6,7 @@ class Sphere {
 public:
 
 	// Creates a sphere  
-	Sphere(float x, float y, float z, float _rad);
+	Sphere(float x, float y, float z, float _rad, int segments);
 	~Sphere(void);
 
 	Sphere() {
