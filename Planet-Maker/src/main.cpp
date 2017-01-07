@@ -54,6 +54,7 @@ int main() {
 	float elevation = 0.1f;
 	float amplitude = 0.01f;
 	float lacunarity = 1.0f;
+	float frequency = 4.0f;
 	int octaves = 6;
 	int seed = 0;
 
@@ -82,9 +83,11 @@ int main() {
 	GLint gl_color_med = glGetUniformLocation(proceduralShader.programID, "color_med"); // base color of planet
 	GLint gl_color_high = glGetUniformLocation(proceduralShader.programID, "color_high"); // base color of planet
 
-	GLfloat gl_amplitude = glGetUniformLocation(proceduralShader.programID, "amp");
+	GLfloat gl_amplitude = glGetUniformLocation(proceduralShader.programID, "amplitude");
 	GLfloat gl_elevation = glGetUniformLocation(proceduralShader.programID, "elevationModifier");
 	GLint gl_seed = glGetUniformLocation(proceduralShader.programID, "seed");
+	GLint gl_octaves = glGetUniformLocation(proceduralShader.programID, "octaves");
+	GLfloat gl_frequency = glGetUniformLocation(proceduralShader.programID, "frequency");
 
 	MatrixStack MVstack; MVstack.init();
 
@@ -104,13 +107,13 @@ int main() {
 		{
 			ImGui::Text("Procedural Planet Maker");
 			ImGui::Separator();
-			ImGui::SliderInt("Octaves", &octaves, 1, 6);
+			ImGui::SliderInt("Octaves", &octaves, 1, 10);
 			if (show_tooltips && ImGui::IsItemHovered())
-				ImGui::SetTooltip("The numbers of iterations the procedural method has.");
-
+				ImGui::SetTooltip("The numbers of sub-step iterations the procedural method has.");
 
 			ImGui::SliderInt("Seed", &seed, 0, 100);
 			ImGui::SliderFloat("Lacunarity", &lacunarity, 0.0f, 1.0f);
+			ImGui::SliderFloat("Frequency", &frequency, 0.1f, 20.0f);
 			ImGui::SliderFloat("Amplitude", &amplitude, 0.0f, 1.0f);
 			ImGui::SliderFloat("Elevation", &elevation, 0.0f, 0.2f);
 
@@ -151,6 +154,7 @@ int main() {
 				octaves = 6;
 				seed = 0;
 
+				color_glow[0] = color_glow[1] = color_glow[2] = 1.0f;
 				color_low[0] = color_low[1] = color_low[2] = 1.0f;
 				color_med[0] = color_med[1] = color_med[2] = 1.0f;
 				color_high[0] = color_high[1] = color_high[2] = 1.0f;
@@ -169,8 +173,6 @@ int main() {
 		{
 			dT = glfwGetTime() - lastTime;
 		}
-
-		rotationRadians += 
 
 		//glfw input handler
 		inputHandler(currentWindow, dT);
@@ -208,6 +210,9 @@ int main() {
 		glUniform1f(gl_amplitude, amplitude);
 		glUniform1f(gl_elevation, elevation);
 		glUniform1i(gl_seed, seed);
+		glUniform1i(gl_octaves, octaves);
+		glUniform1f(gl_frequency, frequency);
+
 
 		glUniform3fv(gl_color_glow, 1, &color_glow[0]);
 		glUniform3fv(gl_color_low, 1, &color_low[0]);

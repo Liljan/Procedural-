@@ -191,6 +191,8 @@ uniform float time;
 uniform int seed;
 uniform float amp;
 uniform float elevationModifier;
+uniform int octaves;
+uniform float frequency;
 
 out vec3 interpolatedNormal;
 out vec2 st;
@@ -199,16 +201,15 @@ out float height;
 void main(){
 
   //float minElevation = -0.2;
-  float frq = 4.0;
-  float dmp = 0.5;
 
-  float elevation = cnoise(frq*(Position + seed));
-  elevation += 1.0/2.0*(cnoise(2.0*frq*(Position + seed)));
-  elevation += 1.0/4.0*(cnoise(4.0*frq*(Position + seed)));
-  elevation += 1.0/8.0*(cnoise(8.0*frq*(Position + seed)));
-  elevation += 1.0/16.0*(cnoise(16.0*frq*(Position + seed)));
-  elevation += 1.0/32.0*(cnoise(32.0*frq*(Position + seed)));
-  elevation += 1.0/64.0*(cnoise(64.0*frq*(Position + seed)));
+  // first octave
+  float elevation = cnoise(frequency*(Position + seed));
+
+  // second to n:th octave
+  for(float o = 1.0; o < octaves; o++)
+  {
+  	elevation += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*(Position + seed));
+  }
 
 //  vec3 pos = Position + amp * Normal * sin(frq * time + frq * Position.y);
   
