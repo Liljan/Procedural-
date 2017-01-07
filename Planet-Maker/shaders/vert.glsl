@@ -189,7 +189,7 @@ uniform mat4 P;
 uniform float time;
 
 uniform int seed;
-uniform float amp;
+uniform float radius;
 uniform float elevationModifier;
 uniform int octaves;
 uniform float frequency;
@@ -215,7 +215,7 @@ void main(){
   
   //vec3 pos = Position + amp * Normal;
   //pos += elevation * Normal * elevationModifier;
-  vec3 pos = Position + amp * Normal;
+  vec3 pos = Position + radius * Normal;
   pos += elevation * Normal * elevationModifier;
 
   //vec3 pos = Position + 0.01*Normal*sin(10.0*time+10.0*Position.y);

@@ -52,7 +52,7 @@ int main() {
 
 	// Procedural related variables
 	float elevation = 0.1f;
-	float amplitude = 0.01f;
+	float radius = 0.01f;
 	float lacunarity = 1.0f;
 	float frequency = 4.0f;
 	int octaves = 6;
@@ -68,9 +68,8 @@ int main() {
 	bool use_cell = false;
 
 	// other shite
-	float rotationDegrees = 0.0f;
-	float rotationRadians = 0.0f;
-	float shininess = 50.0f;
+	float rotation_degrees[3] = { 0.0f,0.0f, 0.0f };
+	float rotation_radians[3] = { 0.0f,0.0f, 0.0f };
 
 	Shader proceduralShader;
 	proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
@@ -83,7 +82,7 @@ int main() {
 	GLint gl_color_med = glGetUniformLocation(proceduralShader.programID, "color_med"); // base color of planet
 	GLint gl_color_high = glGetUniformLocation(proceduralShader.programID, "color_high"); // base color of planet
 
-	GLfloat gl_amplitude = glGetUniformLocation(proceduralShader.programID, "amplitude");
+	GLfloat gl_radius = glGetUniformLocation(proceduralShader.programID, "radius");
 	GLfloat gl_elevation = glGetUniformLocation(proceduralShader.programID, "elevationModifier");
 	GLint gl_seed = glGetUniformLocation(proceduralShader.programID, "seed");
 	GLint gl_octaves = glGetUniformLocation(proceduralShader.programID, "octaves");
@@ -112,10 +111,21 @@ int main() {
 				ImGui::SetTooltip("The numbers of sub-step iterations the procedural method has.");
 
 			ImGui::SliderInt("Seed", &seed, 0, 100);
+			if (show_tooltips && ImGui::IsItemHovered())
+				ImGui::SetTooltip("Change seed to vary the noise.");
+
 			ImGui::SliderFloat("Lacunarity", &lacunarity, 0.0f, 1.0f);
-			ImGui::SliderFloat("Frequency", &frequency, 0.1f, 20.0f);
-			ImGui::SliderFloat("Amplitude", &amplitude, 0.0f, 1.0f);
+			ImGui::SliderFloat("Frequency", &frequency, 0.1f, 10.0f);
+			if (show_tooltips && ImGui::IsItemHovered())
+				ImGui::SetTooltip("Frequency of the noise.");
+
+			ImGui::SliderFloat("Radius", &radius, 0.0f, 1.0f);
+			if (show_tooltips && ImGui::IsItemHovered())
+				ImGui::SetTooltip("Radius of the planet.");
+
 			ImGui::SliderFloat("Elevation", &elevation, 0.0f, 0.2f);
+			if (show_tooltips && ImGui::IsItemHovered())
+				ImGui::SetTooltip("Maximum height of the mountains.");
 
 			ImGui::Separator();
 
@@ -140,16 +150,17 @@ int main() {
 				ImGui::EndMenu();
 			}
 
-			ImGui::SliderFloat("Rotation", &rotationDegrees, 0, 360);
-			rotationRadians = degree_to_radians(rotationDegrees);
+			ImGui::SliderFloat("Azimuth", &rotation_degrees[1], 0.0f, 360.0f);
+			ImGui::SliderFloat("Inclination", &rotation_degrees[0], 0.0f, 360.0f);
 
-			ImGui::SliderFloat("Shininess", &shininess, 0.0f, 100.0f);
+			rotation_radians[0] = degree_to_radians(rotation_degrees[0]);
+			rotation_radians[1] = degree_to_radians(rotation_degrees[1]);
 
 			ImGui::Spacing();
 			ImGui::Checkbox("Show tooltips", &show_tooltips);
 
 			if (ImGui::Button("Reset")) {
-				amplitude = 1.0f;
+				radius = 1.0f;
 				lacunarity = 1.0f;
 				octaves = 6;
 				seed = 0;
@@ -160,7 +171,7 @@ int main() {
 				color_high[0] = color_high[1] = color_high[2] = 1.0f;
 
 				use_perlin = true;
-				rotationDegrees = 0.f;
+				rotation_degrees[0] = rotation_degrees[1] = rotation_degrees[2] = 0.0f;
 			}
 
 		}
@@ -204,15 +215,15 @@ int main() {
 		MVstack.push();
 		//glUniform4fv(gl_color_low, 1, &color_low[0]);
 		MVstack.translate(sphere.getPosition());
-		MVstack.rotY(rotationRadians);
+		MVstack.rotX(rotation_radians[0]);
+		MVstack.rotY(rotation_radians[1]);
 		glUniformMatrix4fv(locationMV, 1, GL_FALSE, MVstack.getCurrentMatrix());
 
-		glUniform1f(gl_amplitude, amplitude);
+		glUniform1f(gl_radius, radius);
 		glUniform1f(gl_elevation, elevation);
 		glUniform1i(gl_seed, seed);
 		glUniform1i(gl_octaves, octaves);
 		glUniform1f(gl_frequency, frequency);
-
 
 		glUniform3fv(gl_color_glow, 1, &color_glow[0]);
 		glUniform3fv(gl_color_low, 1, &color_low[0]);
