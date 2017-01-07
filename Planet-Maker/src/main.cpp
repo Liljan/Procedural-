@@ -2,7 +2,12 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include "glfwContext.h"
+#include <iostream>
+#include <fstream>
+
 #include <Windows.h>
+#include <string>
+#include <sstream>
 
 #include "Shader.h"
 #include "MatrixStack.h"
@@ -14,6 +19,139 @@ void cameraHandler(GLFWwindow* _window, double _dT, Camera* _cam);
 void GLcalls();
 
 static const float M_PI = 3.141592653f;
+static const char fileNameBuffer[30] = {};
+
+static char load_buffer[256] = "";
+static char save_buffer[256] = "";
+static char files_buffer[1024] = "";
+
+static const std::string FILE_ENDING = ".ass";
+
+// Procedural related variables
+int segments = 32;
+float elevation = 0.1f;
+float radius = 0.01f;
+float lacunarity = 1.0f;
+float frequency = 4.0f;
+int octaves = 6;
+int seed = 0;
+
+float color_glow[3] = { 1.0f,1.0f,0.0f };
+float color_low[3] = { 1.0f,0.1f,0.0f };
+float color_med[3] = { 0.30f,0.3f,0.30f };
+float color_high[3] = { 0.05f,0.01f,0.03f };
+
+bool use_perlin = true;
+bool use_simplex = false;
+bool use_cell = false;
+
+Sphere* sphere;
+
+void list_files()
+{
+	std::vector<std::string> return_file_name;
+	WIN32_FIND_DATA file_info;
+	HANDLE h_find;
+
+	std::string fullPath = "*" + FILE_ENDING;
+	h_find = FindFirstFile(fullPath.c_str(), &file_info);
+
+	file_info;
+
+	if (h_find != INVALID_HANDLE_VALUE) {
+		return_file_name.push_back(file_info.cFileName);
+		while (FindNextFile(h_find, &file_info) != 0) {
+			return_file_name.push_back(file_info.cFileName);
+		}
+	}
+
+	std::stringstream ss;
+	for (int i = 0; i < return_file_name.size(); ++i)
+		ss << return_file_name[i] << std::endl;
+
+	memset(files_buffer, 0, strlen(files_buffer));
+	strcpy(files_buffer, ss.str().c_str());
+}
+
+void load_file(std::string file_name)
+{
+	try
+	{
+		std::ifstream infile(file_name + FILE_ENDING, std::ifstream::binary);
+
+		infile >> segments;
+		infile >> elevation;
+		infile >> radius;
+		infile >> lacunarity;
+		infile >> frequency;
+		infile >> octaves;
+		infile >> seed;
+
+		infile >> color_glow[0];
+		infile >> color_glow[1];
+		infile >> color_glow[2];
+		infile >> color_low[0];
+		infile >> color_low[1];
+		infile >> color_low[2];
+		infile >> color_med[0];
+		infile >> color_med[1];
+		infile >> color_med[2];
+		infile >> color_high[0];
+		infile >> color_high[1];
+		infile >> color_high[2];
+
+		infile >> use_perlin;
+		infile >> use_simplex;
+		infile >> use_cell;
+
+		infile.close();
+		delete sphere;
+		sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+	}
+	catch (const std::exception&)
+	{
+		std::cout << "Error loading" << std::endl;
+	}
+}
+
+void save_file(std::string file_name) {
+
+	try
+	{
+		std::ofstream outfile(file_name + FILE_ENDING, std::ofstream::binary);
+		outfile << segments << std::endl;
+		outfile << elevation << std::endl;
+		outfile << radius << std::endl;
+		outfile << lacunarity << std::endl;
+		outfile << frequency << std::endl;
+		outfile << octaves << std::endl;
+		outfile << seed << std::endl;
+
+		outfile << color_glow[0] << std::endl;
+		outfile << color_glow[1] << std::endl;
+		outfile << color_glow[2] << std::endl;
+		outfile << color_low[0] << std::endl;
+		outfile << color_low[1] << std::endl;
+		outfile << color_low[2] << std::endl;
+		outfile << color_med[0] << std::endl;
+		outfile << color_med[1] << std::endl;
+		outfile << color_med[2] << std::endl;
+		outfile << color_high[0] << std::endl;
+		outfile << color_high[1] << std::endl;
+		outfile << color_high[2] << std::endl;
+
+		outfile << use_perlin << std::endl;
+		outfile << use_simplex << std::endl;
+		outfile << use_cell << std::endl;
+
+		outfile.close();
+	}
+	catch (const std::exception&)
+	{
+		std::cout << "Error saving" << std::endl;
+	}
+}
+
 
 inline float degree_to_radians(float degree) {
 	return M_PI*degree / 180.0f;
@@ -50,26 +188,9 @@ int main() {
 	double lastTime = glfwGetTime() - 0.001;
 	double dT = 0.0;
 
-	// Procedural related variables
-	float elevation = 0.1f;
-	float radius = 0.01f;
-	float lacunarity = 1.0f;
-	float frequency = 4.0f;
-	int octaves = 6;
-	int seed = 0;
-
-	float color_glow[3] = { 1.0f,1.0f,0.0f };
-	float color_low[3] = { 1.0f,0.1f,0.0f };
-	float color_med[3] = { 0.30f,0.3f,0.30f };
-	float color_high[3] = { 0.05f,0.01f,0.03f };
-
-	bool use_perlin = true;
-	bool use_simplex = false;
-	bool use_cell = false;
-
 	// other shite
-	float rotation_degrees[3] = { 0.0f,0.0f, 0.0f };
-	float rotation_radians[3] = { 0.0f,0.0f, 0.0f };
+	float rotation_degrees[2] = { 0.0f,0.0f };
+	float rotation_radians[2] = { 0.0f,0.0f };
 
 	Shader proceduralShader;
 	proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
@@ -90,7 +211,8 @@ int main() {
 
 	MatrixStack MVstack; MVstack.init();
 
-	Sphere sphere(0.0f, 0.0f, 0.0f, 1.0f, 32 * 4);
+	//Sphere sphere(0.0f, 0.0f, 0.0f, 1.0f, 32 * 4);
+	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 
 	Camera mCamera;
 	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
@@ -104,8 +226,45 @@ int main() {
 
 		ImGui_ImplGlfw_NewFrame();
 		{
+			/*			if (ImGui::BeginMainMenuBar()) {
+							if (ImGui::BeginMenu("File")) {
+								if (ImGui::MenuItem("Open")) {
+									std::cout << "open ";
+
+									if (ImGui::Begin("Input")) {
+										ImGui::End();
+									}
+								}
+
+								if (ImGui::MenuItem("Save")) {
+									std::cout << "save ";
+								}
+
+								ImGui::EndMenu();
+							}
+
+							if (ImGui::BeginMenu("Help")) {
+								if (ImGui::MenuItem("No help for you!")) {
+									std::cout << "help ";
+								}
+
+								ImGui::EndMenu();
+							}
+
+							ImGui::EndMainMenuBar();
+						}*/
+
+
 			ImGui::Text("Procedural Planet Maker");
 			ImGui::Separator();
+
+			if (ImGui::SliderInt("Segments", &segments, 1, 50)) {
+				delete sphere;
+				sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+			}
+			if (show_tooltips && ImGui::IsItemHovered())
+				ImGui::SetTooltip("The numbers of segment the mesh has.");
+
 			ImGui::SliderInt("Octaves", &octaves, 1, 10);
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("The numbers of sub-step iterations the procedural method has.");
@@ -150,6 +309,8 @@ int main() {
 				ImGui::EndMenu();
 			}
 
+			ImGui::Separator();
+			ImGui::Text("Rotation");
 			ImGui::SliderFloat("Azimuth", &rotation_degrees[1], 0.0f, 360.0f);
 			ImGui::SliderFloat("Inclination", &rotation_degrees[0], 0.0f, 360.0f);
 
@@ -171,9 +332,33 @@ int main() {
 				color_high[0] = color_high[1] = color_high[2] = 1.0f;
 
 				use_perlin = true;
-				rotation_degrees[0] = rotation_degrees[1] = rotation_degrees[2] = 0.0f;
+				rotation_degrees[0] = rotation_degrees[1] = 0.0f;
 			}
 
+			if (ImGui::BeginMenu("Load/Save")) {
+
+				ImGui::InputText("<-", load_buffer, sizeof(load_buffer));
+
+				ImGui::SameLine();
+				if (ImGui::Button("Load")) {
+					std::string asses(load_buffer);
+					load_file(std::string(load_buffer));
+				}
+
+				ImGui::InputText("->", save_buffer, sizeof(save_buffer));
+
+				ImGui::SameLine();
+				if (ImGui::Button("Save")) {
+					std::cout << "save ";
+					save_file(std::string(save_buffer));
+				}
+				ImGui::InputTextMultiline("  ", files_buffer, sizeof(files_buffer));
+				if (ImGui::Button("List all files")) {
+					list_files();
+				}
+
+				ImGui::EndMenu();
+			}
 		}
 
 		if (dT > 1.0 / 30.0)
@@ -214,7 +399,7 @@ int main() {
 
 		MVstack.push();
 		//glUniform4fv(gl_color_low, 1, &color_low[0]);
-		MVstack.translate(sphere.getPosition());
+		MVstack.translate(sphere->getPosition());
 		MVstack.rotX(rotation_radians[0]);
 		MVstack.rotY(rotation_radians[1]);
 		glUniformMatrix4fv(locationMV, 1, GL_FALSE, MVstack.getCurrentMatrix());
@@ -230,7 +415,8 @@ int main() {
 		glUniform3fv(gl_color_med, 1, &color_med[0]);
 		glUniform3fv(gl_color_high, 1, &color_high[0]);
 
-		sphere.render();
+		sphere->render();
+
 		MVstack.pop();
 
 		MVstack.pop(); //Camera transforms >--
@@ -247,6 +433,7 @@ int main() {
 	}
 
 	ImGui_ImplGlfw_Shutdown();
+	delete sphere;
 
 	return 0;
 }
