@@ -201,12 +201,6 @@ out vec4 color;
 
 void main() {
 
-    // Pre-defined colors
-  //vec3 colorMtn1 = vec3(0.05,0.01,0.03);
-  //vec3 colorMtn2 = vec3(0.30,0.3,0.30);
-  //vec3 colorLava = vec3(1.0,0.1,0.0);
-  //vec3 colorGlow = vec3(1.0,1.0,0.0);
-
   vec3 mixLava = mix(color_low,color_glow,cnoise( vec3(height) * 0.8));
   vec3 mixMtn = mix(color_high,color_med, cnoise( 2.0 * vec3(10.0*height) ) );
 
@@ -215,15 +209,26 @@ void main() {
   //vec3 cloudcolor = vec3(1.0, 1.0, 1.0);  
   
   vec3 diffusecolor;
-  
+  /*
   if(height > 0.1)
   {
     diffusecolor = mix(mixLava,mixMtn,height);
   }
   else
   {
-    diffusecolor = mix(mixLava, mixLava, 0.5*sin(time) + 0.5);
-  }
+    diffusecolor = mix(mixLava, mixLava, 0.5 + 0.5);
+  } */
+
+  // height: from 0 to 1
+
+  if(height < 0.1)
+    diffusecolor = color_glow;
+  else if(height < 0.50)
+    diffusecolor = color_low;
+  else if(height > 0.50 && height < 0.75)
+    diffusecolor = color_med;
+  else
+    diffusecolor = color_high;
 
   vec3 nNormal = normalize(interpolatedNormal);
   float diffuselighting = max(0.0, nNormal.z);

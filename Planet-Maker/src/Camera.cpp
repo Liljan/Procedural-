@@ -96,16 +96,16 @@ void Camera::setPerspective(glm::mat4* _Perspective)
 void Camera::update()
 {
 	direction = glm::vec3(cos(pitch)*sin(yaw),
-						  sin(pitch),
-						  cos(pitch)*cos(yaw));
+		sin(pitch),
+		cos(pitch)*cos(yaw));
 
 	rightDirection = glm::vec3(sin(yaw - 3.14f / 2.0f),
-							   0,
-							   cos(yaw - 3.14f / 2.0f));
+		0,
+		cos(yaw - 3.14f / 2.0f));
 	upDirection = glm::cross(rightDirection, direction);
 
-	
 	glm::vec3 test = glm::vec3(transform[3]);
+	//glm::vec3 middle(0.f);
 	transform = glm::lookAt(position, position + direction, upDirection);
 }
 
@@ -123,26 +123,26 @@ void Camera::fpsCamera(GLFWwindow* _window, double _dT)
 	glm::vec3 translation;
 	float movementSpeed = 0.0f;
 
-	if (glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT)){
+	if (glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT)) {
 		movementSpeed = 10.0f;
 	}
-	else{
+	else {
 		movementSpeed = 1.0f;
 	}
 	if (glfwGetKey(_window, GLFW_KEY_W)) {
-		translation = direction*movementSpeed*(float)_dT;
+		translation = direction * movementSpeed * (float)_dT;
 		this->translate(&translation);
 	}
-	if (glfwGetKey(_window, GLFW_KEY_S)){
-		translation = direction*-movementSpeed*(float)_dT;
+	if (glfwGetKey(_window, GLFW_KEY_S)) {
+		translation = direction * -movementSpeed * (float)_dT;
 		this->translate(&translation);
 	}
 	if (glfwGetKey(_window, GLFW_KEY_A)) {
-		translation = rightDirection*-movementSpeed*(float)_dT;
+		translation = rightDirection * -movementSpeed * (float)_dT;
 		this->translate(&translation);
 	}
 	if (glfwGetKey(_window, GLFW_KEY_D)) {
-		translation = rightDirection*movementSpeed*(float)_dT;
+		translation = rightDirection * movementSpeed * (float)_dT;
 		this->translate(&translation);
 	}
 

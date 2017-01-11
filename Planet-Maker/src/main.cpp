@@ -161,10 +161,10 @@ int main() {
 	glfwContext glfw;
 	GLFWwindow* currentWindow = nullptr;
 
-	glfw.init(1280, 720, "Procedural Planet Maker");
+	glfw.init(1920, 1080, "Procedural Planet Maker");
 	glfw.getCurrentWindow(currentWindow);
 	glfwSetInputMode(currentWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	glfwSetCursorPos(currentWindow, 1280 / 2, 720 / 2);
+	glfwSetCursorPos(currentWindow, 1920 / 2, 1080 / 2);
 
 	// Setup ImGui binding
 	ImGui_ImplGlfw_Init(currentWindow, true);
@@ -378,7 +378,7 @@ int main() {
 			if (!fpsResetBool)
 			{
 				fpsResetBool = true;
-				glfwSetCursorPos(currentWindow, 1280 / 2, 720 / 2);
+				glfwSetCursorPos(currentWindow, 1920 / 2, 1080 / 2);
 			}
 
 			mCamera.fpsCamera(currentWindow, dT);
@@ -398,7 +398,6 @@ int main() {
 		MVstack.multiply(mCamera.getTransformM());
 
 		MVstack.push();
-		//glUniform4fv(gl_color_low, 1, &color_low[0]);
 		MVstack.translate(sphere->getPosition());
 		MVstack.rotX(rotation_radians[0]);
 		MVstack.rotY(rotation_radians[1]);

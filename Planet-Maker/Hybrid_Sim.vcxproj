@@ -26,6 +26,7 @@
     <ClCompile Include="src\glfwContext.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MatrixStack.cpp" />
+    <ClCompile Include="src\Plane.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
@@ -40,6 +41,14 @@
     <ClInclude Include="include\Parameters.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\Sphere.h" />
+    <ClInclude Include="Plane.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Planet-Maker.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="planet.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6A7D3026-6D3C-478E-8575-D33411B52B26}</ProjectGuid>
@@ -94,33 +103,49 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\include;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\imgui;$(IncludePath)</IncludePath>
+    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\include;$(IncludePath)</IncludePath>
+    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui;$(ExecutablePath)</ExecutablePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui;$(ExecutablePath)</ExecutablePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\glew-2.0.0\include;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\glm;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\glfw-3.2.1.bin.WIN64\include;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>openGL32.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;openGL32.lib;glfw3.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>openGL32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;openGL32.lib;glfw3.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -129,14 +154,18 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\glew-2.0.0\include;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\glm;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\glfw-3.2.1.bin.WIN64\include;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>openGL32.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;openGL32.lib;glfw3.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -145,14 +174,18 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>openGL32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;openGL32.lib;glfw3.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
