@@ -202,10 +202,10 @@ void main(){
 
   //float minElevation = -0.2;
 
-  // first octave
+  // 0th octave
   float elevation = cnoise(frequency*(Position + seed));
 
-  // second to n:th octave
+  // 1th to (n-1):th octave
   for(float o = 1.0; o < octaves; o++)
   {
   	elevation += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*(Position + seed));

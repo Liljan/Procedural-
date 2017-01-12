@@ -36,10 +36,12 @@ float frequency = 4.0f;
 int octaves = 6;
 int seed = 0;
 
-float color_glow[3] = { 1.0f,1.0f,0.0f };
-float color_low[3] = { 1.0f,0.1f,0.0f };
-float color_med[3] = { 0.30f,0.3f,0.30f };
-float color_high[3] = { 0.05f,0.01f,0.03f };
+float color_water_1[3] = { 1.0f,1.0f,1.0f };
+float color_water_2[3] = { 1.0f,1.0f,1.0f };
+float color_ground_1[3] = { 1.0f,1.0f,1.0f };
+float color_ground_2[3] = { 1.0f,1.0f,1.0f };
+float color_mountain_1[3] = { 1.0f,1.0f,1.0f };
+float color_mountain_2[3] = { 0.05f,0.01f,0.03f };
 
 bool use_perlin = true;
 bool use_simplex = false;
@@ -73,6 +75,18 @@ void list_files()
 	strcpy(files_buffer, ss.str().c_str());
 }
 
+void color_to_file(std::ofstream &file, float color[3]) {
+	file << color[0] << std::endl;
+	file << color[1] << std::endl;
+	file << color[2] << std::endl;
+}
+
+void file_to_color(std::ifstream &file, float color[3]) {
+	file >> color[0];
+	file >> color[1];
+	file >> color[2];
+}
+
 void load_file(std::string file_name)
 {
 	try
@@ -87,18 +101,13 @@ void load_file(std::string file_name)
 		infile >> octaves;
 		infile >> seed;
 
-		infile >> color_glow[0];
-		infile >> color_glow[1];
-		infile >> color_glow[2];
-		infile >> color_low[0];
-		infile >> color_low[1];
-		infile >> color_low[2];
-		infile >> color_med[0];
-		infile >> color_med[1];
-		infile >> color_med[2];
-		infile >> color_high[0];
-		infile >> color_high[1];
-		infile >> color_high[2];
+		// colors
+		file_to_color(infile, color_water_1);
+		file_to_color(infile, color_water_2);
+		file_to_color(infile, color_ground_1);
+		file_to_color(infile, color_ground_2);
+		file_to_color(infile, color_mountain_1);
+		file_to_color(infile, color_mountain_2);
 
 		infile >> use_perlin;
 		infile >> use_simplex;
@@ -127,18 +136,13 @@ void save_file(std::string file_name) {
 		outfile << octaves << std::endl;
 		outfile << seed << std::endl;
 
-		outfile << color_glow[0] << std::endl;
-		outfile << color_glow[1] << std::endl;
-		outfile << color_glow[2] << std::endl;
-		outfile << color_low[0] << std::endl;
-		outfile << color_low[1] << std::endl;
-		outfile << color_low[2] << std::endl;
-		outfile << color_med[0] << std::endl;
-		outfile << color_med[1] << std::endl;
-		outfile << color_med[2] << std::endl;
-		outfile << color_high[0] << std::endl;
-		outfile << color_high[1] << std::endl;
-		outfile << color_high[2] << std::endl;
+		// colors
+		color_to_file(outfile, color_water_1);
+		color_to_file(outfile, color_water_2);
+		color_to_file(outfile, color_ground_1);
+		color_to_file(outfile, color_ground_2);
+		color_to_file(outfile, color_mountain_1);
+		color_to_file(outfile, color_mountain_2);
 
 		outfile << use_perlin << std::endl;
 		outfile << use_simplex << std::endl;
@@ -198,10 +202,12 @@ int main() {
 	GLint locationP = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
 	GLint locationMV = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
 
-	GLint gl_color_glow = glGetUniformLocation(proceduralShader.programID, "color_glow"); // base color of planet
-	GLint gl_color_low = glGetUniformLocation(proceduralShader.programID, "color_low"); // base color of planet
-	GLint gl_color_med = glGetUniformLocation(proceduralShader.programID, "color_med"); // base color of planet
-	GLint gl_color_high = glGetUniformLocation(proceduralShader.programID, "color_high"); // base color of planet
+	GLint gl_color_water_1 = glGetUniformLocation(proceduralShader.programID, "color_water_1"); // water color of the planet
+	GLint gl_color_water_2 = glGetUniformLocation(proceduralShader.programID, "color_water_2"); // water color of the planet
+	GLint gl_color_ground_1 = glGetUniformLocation(proceduralShader.programID, "color_ground_1"); // ground color of the planet
+	GLint gl_color_ground_2 = glGetUniformLocation(proceduralShader.programID, "color_ground_2"); // ground color of the planet
+	GLint gl_color_mountain_1 = glGetUniformLocation(proceduralShader.programID, "color_mountain_1"); // mountain color of the planet
+	GLint gl_color_mountain_2 = glGetUniformLocation(proceduralShader.programID, "color_mountain_2"); // mountain color of the planet
 
 	GLfloat gl_radius = glGetUniformLocation(proceduralShader.programID, "radius");
 	GLfloat gl_elevation = glGetUniformLocation(proceduralShader.programID, "elevationModifier");
@@ -289,10 +295,12 @@ int main() {
 			ImGui::Separator();
 
 			ImGui::Text("Colors");
-			ImGui::ColorEdit3("Glow", color_glow);
-			ImGui::ColorEdit3("Low", color_low);
-			ImGui::ColorEdit3("Medium", color_med);
-			ImGui::ColorEdit3("High", color_high);
+			ImGui::ColorEdit3("Low color 1", color_water_1);
+			ImGui::ColorEdit3("Low color 2", color_water_2);
+			ImGui::ColorEdit3("Medium color 1", color_ground_1);
+			ImGui::ColorEdit3("Medium color 2", color_ground_2);
+			ImGui::ColorEdit3("High color 1", color_mountain_1);
+			ImGui::ColorEdit3("High color 2", color_mountain_2);
 
 			ImGui::Separator();
 
@@ -326,10 +334,12 @@ int main() {
 				octaves = 6;
 				seed = 0;
 
-				color_glow[0] = color_glow[1] = color_glow[2] = 1.0f;
-				color_low[0] = color_low[1] = color_low[2] = 1.0f;
-				color_med[0] = color_med[1] = color_med[2] = 1.0f;
-				color_high[0] = color_high[1] = color_high[2] = 1.0f;
+				color_water_1[0] = color_water_1[1] = color_water_1[2] = 1.0f;
+				color_water_2[0] = color_water_2[1] = color_water_2[2] = 1.0f;
+				color_ground_1[0] = color_ground_1[1] = color_ground_1[2] = 1.0f;
+				color_ground_2[0] = color_ground_2[1] = color_ground_2[2] = 1.0f;
+				color_mountain_1[0] = color_mountain_1[1] = color_mountain_1[2] = 1.0f;
+				color_mountain_2[0] = color_mountain_2[1] = color_mountain_2[2] = 1.0f;
 
 				use_perlin = true;
 				rotation_degrees[0] = rotation_degrees[1] = 0.0f;
@@ -409,10 +419,12 @@ int main() {
 		glUniform1i(gl_octaves, octaves);
 		glUniform1f(gl_frequency, frequency);
 
-		glUniform3fv(gl_color_glow, 1, &color_glow[0]);
-		glUniform3fv(gl_color_low, 1, &color_low[0]);
-		glUniform3fv(gl_color_med, 1, &color_med[0]);
-		glUniform3fv(gl_color_high, 1, &color_high[0]);
+		glUniform3fv(gl_color_water_1, 1, &color_water_1[0]);
+		glUniform3fv(gl_color_water_2, 1, &color_water_2[0]);
+		glUniform3fv(gl_color_ground_1, 1, &color_ground_1[0]);
+		glUniform3fv(gl_color_ground_2, 1, &color_ground_2[0]);
+		glUniform3fv(gl_color_mountain_1, 1, &color_mountain_1[0]);
+		glUniform3fv(gl_color_mountain_2, 1, &color_mountain_2[0]);
 
 		sphere->render();
 

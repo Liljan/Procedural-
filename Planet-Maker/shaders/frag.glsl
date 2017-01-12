@@ -191,18 +191,39 @@ in float height;
 
 uniform float time;
 uniform sampler2D tex;
-uniform vec3 color_glow;
-uniform vec3 color_low;
-uniform vec3 color_med;
-uniform vec3 color_high;
+
+uniform vec3 color_water_1; // water color of the planet
+uniform vec3 color_water_2; // water color of the planet
+uniform vec3 color_ground_1; // ground color of the planet
+uniform vec3 color_ground_2; // ground color of the planet
+uniform vec3 color_mountain_1; // mountain color of the planet
+uniform vec3 color_mountain_2; // mountain color of the planet
+
 uniform int seed;
+
+uniform float frequency;
+uniform int octaves;
 
 out vec4 color;
 
 void main() {
 
-  vec3 mixLava = mix(color_low,color_glow,cnoise( vec3(height) * 0.8));
-  vec3 mixMtn = mix(color_high,color_med, cnoise( 2.0 * vec3(10.0*height) ) );
+  //vec3 mixLava = mix(color_low,color_glow,cnoise( vec3(height) * 0.8));
+  //vec3 mixMtn = mix(color_high,color_med, cnoise( 2.0 * vec3(10.0*height) ) );
+
+  vec3 watermix;
+  vec3 groundmix;
+  vec3 mountainmix;
+
+  float noise = cnoise(frequency*vec3(height + seed));
+
+  // 1th to (n-1):th octave
+  for(float o = 1.0; o < octaves; o++)
+  {
+    noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*vec3(height + seed));
+  }
+
+
 
   //vec3 groundcolor = texture(tex,st).rgb;
   //float alpha = texture(tex, st+vec2(-0.02*time, 0.0)).a;
@@ -222,13 +243,13 @@ void main() {
   // height: from 0 to 1
 
   if(height < 0.1)
-    diffusecolor = color_glow;
+    diffusecolor = color_water_1;
   else if(height < 0.50)
-    diffusecolor = color_low;
+    diffusecolor = color_ground_1;
   else if(height > 0.50 && height < 0.75)
-    diffusecolor = color_med;
+    diffusecolor = color_mountain_1;
   else
-    diffusecolor = color_high;
+    diffusecolor = color_mountain_2;
 
   vec3 nNormal = normalize(interpolatedNormal);
   float diffuselighting = max(0.0, nNormal.z);
