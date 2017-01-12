@@ -49,6 +49,7 @@ bool use_cell = false;
 
 Sphere* sphere;
 
+
 void list_files()
 {
 	std::vector<std::string> return_file_name;
@@ -75,17 +76,20 @@ void list_files()
 	strcpy(files_buffer, ss.str().c_str());
 }
 
+
 void color_to_file(std::ofstream &file, float color[3]) {
 	file << color[0] << std::endl;
 	file << color[1] << std::endl;
 	file << color[2] << std::endl;
 }
 
+
 void file_to_color(std::ifstream &file, float color[3]) {
 	file >> color[0];
 	file >> color[1];
 	file >> color[2];
 }
+
 
 void load_file(std::string file_name)
 {
@@ -122,6 +126,7 @@ void load_file(std::string file_name)
 		std::cout << "Error loading" << std::endl;
 	}
 }
+
 
 void save_file(std::string file_name) {
 
@@ -161,6 +166,7 @@ inline float degree_to_radians(float degree) {
 	return M_PI*degree / 180.0f;
 }
 
+
 int main() {
 	glfwContext glfw;
 	GLFWwindow* currentWindow = nullptr;
@@ -184,6 +190,7 @@ int main() {
 
 	// GUI related variables
 	bool show_tooltips = true;
+	bool draw_wireframe = false;
 
 	// Time related variables
 	bool is_paused = false;
@@ -259,11 +266,10 @@ int main() {
 				ImGui::EndMainMenuBar();
 			}
 
-
 			ImGui::Text("Procedural Planet Maker");
 			ImGui::Separator();
 
-			if (ImGui::SliderInt("Segments", &segments, 1, 50)) {
+			if (ImGui::SliderInt("Segments", &segments, 1, 200)) {
 				delete sphere;
 				sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 			}
@@ -349,6 +355,12 @@ int main() {
 				rotation_degrees[0] = rotation_degrees[1] = 0.0f;
 			}
 
+			ImGui::Checkbox("Draw wireframe", &draw_wireframe);
+
+			if (ImGui::Button("Reload shaders")) {
+				proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
+			}
+
 			if (ImGui::BeginMenu("Load/Save")) {
 
 				ImGui::InputText("<-", load_buffer, sizeof(load_buffer));
@@ -404,6 +416,9 @@ int main() {
 
 		GLcalls();
 
+		if (draw_wireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 		glUseProgram(proceduralShader.programID);
 
 		MVstack.push();//Camera transforms --<
@@ -437,6 +452,7 @@ int main() {
 		MVstack.pop(); //Camera transforms >--
 
 		glUseProgram(0);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		// Rendering imgui
 		int display_w, display_h;
@@ -461,7 +477,6 @@ void inputHandler(GLFWwindow* _window, double _dT)
 	}
 }
 
-
 void GLcalls()
 {
 	glClearColor(0.01f, 0.01f, 0.01f, 0.0f);
@@ -470,7 +485,7 @@ void GLcalls()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glDisable(GL_TEXTURE);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

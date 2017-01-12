@@ -226,32 +226,40 @@ void main() {
   //vec3 groundcolor = texture(tex,st).rgb;
   //float alpha = texture(tex, st+vec2(-0.02*time, 0.0)).a;
   //vec3 cloudcolor = vec3(1.0, 1.0, 1.0);  
-  
+
+  watermix = mix(color_water_1, color_water_2, noise);
+  groundmix = mix(color_ground_1,color_ground_2, noise);
+  mountainmix = mix(color_mountain_1,color_mountain_2, noise);
+
   vec3 diffusecolor;
-  /*
-  if(height > 0.1)
-  {
-    diffusecolor = mix(mixLava,mixMtn,height);
-  }
-  else
-  {
-    diffusecolor = mix(mixLava, mixLava, 0.5 + 0.5);
-  } */
-
   // height: from 0 to 1
+  /*
+  if(height < 0.1)
+  {
+    diffusecolor = mix(watermix,watermix,height);
+  }
+  else if(height < 0.5)
+  {
+    diffusecolor = mix(groundmix, groundmix, height);
+  }else{
+    diffusecolor = mix(mountainmix,mountainmix, height);
+  }
+  */
 
+  
   if(height < 0.125)
     diffusecolor = color_water_1;
-  else if(height > 0.125 && height < 0.25)
+  else if(height < 0.25)
     diffusecolor = color_water_2;
-  else if(height > 0.25 && height < 0.375)
+  else if(height < 0.375)
     diffusecolor = color_ground_1;
-  else if(height > 0.375 && height < 0.625)
+  else if(height < 0.625)
     diffusecolor = color_ground_2;
-  else if(height > 0.625 && height < 0.75)
+  else if(height < 0.75)
     diffusecolor = color_mountain_1;
   else
     diffusecolor = color_mountain_2;
+    
 
   vec3 nNormal = normalize(interpolatedNormal);
   float diffuselighting = max(0.0, nNormal.z);
