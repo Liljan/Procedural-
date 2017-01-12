@@ -217,7 +217,6 @@ int main() {
 
 	MatrixStack MVstack; MVstack.init();
 
-	//Sphere sphere(0.0f, 0.0f, 0.0f, 1.0f, 32 * 4);
 	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 
 	Camera mCamera;
@@ -232,33 +231,33 @@ int main() {
 
 		ImGui_ImplGlfw_NewFrame();
 		{
-			/*			if (ImGui::BeginMainMenuBar()) {
-							if (ImGui::BeginMenu("File")) {
-								if (ImGui::MenuItem("Open")) {
-									std::cout << "open ";
+			if (ImGui::BeginMainMenuBar()) {
+				if (ImGui::BeginMenu("File")) {
+					if (ImGui::MenuItem("Open")) {
+						std::cout << "open ";
 
-									if (ImGui::Begin("Input")) {
-										ImGui::End();
-									}
-								}
+						if (ImGui::Begin("Input")) {
+							ImGui::End();
+						}
+					}
 
-								if (ImGui::MenuItem("Save")) {
-									std::cout << "save ";
-								}
+					if (ImGui::MenuItem("Save")) {
+						std::cout << "save ";
+					}
 
-								ImGui::EndMenu();
-							}
+					ImGui::EndMenu();
+				}
 
-							if (ImGui::BeginMenu("Help")) {
-								if (ImGui::MenuItem("No help for you!")) {
-									std::cout << "help ";
-								}
+				if (ImGui::BeginMenu("Help")) {
+					if (ImGui::MenuItem("No help for you!")) {
+						std::cout << "help ";
+					}
 
-								ImGui::EndMenu();
-							}
+					ImGui::EndMenu();
+				}
 
-							ImGui::EndMainMenuBar();
-						}*/
+				ImGui::EndMainMenuBar();
+			}
 
 
 			ImGui::Text("Procedural Planet Maker");
@@ -294,13 +293,18 @@ int main() {
 
 			ImGui::Separator();
 
-			ImGui::Text("Colors");
-			ImGui::ColorEdit3("Low color 1", color_water_1);
-			ImGui::ColorEdit3("Low color 2", color_water_2);
-			ImGui::ColorEdit3("Medium color 1", color_ground_1);
-			ImGui::ColorEdit3("Medium color 2", color_ground_2);
-			ImGui::ColorEdit3("High color 1", color_mountain_1);
-			ImGui::ColorEdit3("High color 2", color_mountain_2);
+			if (ImGui::BeginMenu("Colors")) {
+
+				ImGui::Text("Colors");
+				ImGui::ColorEdit3("Low color 1", color_water_1);
+				ImGui::ColorEdit3("Low color 2", color_water_2);
+				ImGui::ColorEdit3("Medium color 1", color_ground_1);
+				ImGui::ColorEdit3("Medium color 2", color_ground_2);
+				ImGui::ColorEdit3("High color 1", color_mountain_1);
+				ImGui::ColorEdit3("High color 2", color_mountain_2);
+
+				ImGui::EndMenu();
+			}
 
 			ImGui::Separator();
 

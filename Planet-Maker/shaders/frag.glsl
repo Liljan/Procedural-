@@ -223,8 +223,6 @@ void main() {
     noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*vec3(height + seed));
   }
 
-
-
   //vec3 groundcolor = texture(tex,st).rgb;
   //float alpha = texture(tex, st+vec2(-0.02*time, 0.0)).a;
   //vec3 cloudcolor = vec3(1.0, 1.0, 1.0);  
@@ -242,11 +240,15 @@ void main() {
 
   // height: from 0 to 1
 
-  if(height < 0.1)
+  if(height < 0.125)
     diffusecolor = color_water_1;
-  else if(height < 0.50)
+  else if(height > 0.125 && height < 0.25)
+    diffusecolor = color_water_2;
+  else if(height > 0.25 && height < 0.375)
     diffusecolor = color_ground_1;
-  else if(height > 0.50 && height < 0.75)
+  else if(height > 0.375 && height < 0.625)
+    diffusecolor = color_ground_2;
+  else if(height > 0.625 && height < 0.75)
     diffusecolor = color_mountain_1;
   else
     diffusecolor = color_mountain_2;
