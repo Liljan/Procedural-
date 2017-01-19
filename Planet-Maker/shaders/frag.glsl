@@ -189,6 +189,9 @@ in vec3 interpolatedNormal;
 in vec2 st;
 in float height;
 
+in vec3 camPos;
+in vec3 pos;
+
 uniform float time;
 uniform sampler2D tex;
 
@@ -206,6 +209,8 @@ uniform int octaves;
 
 out vec4 color;
 
+vec4 lightPos = vec4(0.0f, 1.0f, -1.0f, 1.0f);
+
 void main() {
 
   //vec3 mixLava = mix(color_low,color_glow,cnoise( vec3(height) * 0.8));
@@ -218,10 +223,10 @@ void main() {
   float noise = cnoise(frequency*vec3(height + seed));
 
   // 1th to (n-1):th octave
-  for(float o = 1.0; o < octaves; o++)
+/*  for(float o = 1.0; o < octaves; o++)
   {
     noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*vec3(height + seed));
-  }
+  }*/
 
   //vec3 groundcolor = texture(tex,st).rgb;
   //float alpha = texture(tex, st+vec2(-0.02*time, 0.0)).a;
@@ -232,24 +237,14 @@ void main() {
   mountainmix = mix(color_mountain_1,color_mountain_2, noise);
 
   vec3 diffusecolor;
-  // height: from 0 to 1
-  /*
-  if(height < 0.1)
-  {
-    diffusecolor = mix(watermix,watermix,height);
-  }
-  else if(height < 0.5)
-  {
-    diffusecolor = mix(groundmix, groundmix, height);
-  }else{
-    diffusecolor = mix(mountainmix,mountainmix, height);
-  }
-  */
 
-  
-  if(height < 0.125)
+  //diffusecolor = watermix;
+
+  // height: from 0 to 1
+
+  if(height < 0.02)
     diffusecolor = color_water_1;
-  else if(height < 0.25)
+  else if(height < 0.1)
     diffusecolor = color_water_2;
   else if(height < 0.375)
     diffusecolor = color_ground_1;
@@ -259,10 +254,26 @@ void main() {
     diffusecolor = color_mountain_1;
   else
     diffusecolor = color_mountain_2;
-    
 
-  vec3 nNormal = normalize(interpolatedNormal);
-  float diffuselighting = max(0.0, nNormal.z);
+  
+  //diffusecolor = vec3(0.1,0.2,0.4);
 
-  color = vec4(diffusecolor*diffuselighting, 1.0);
+  vec3 kd = vec3(0.7,0.7,0.7);
+  vec3 ka = vec3(0.1,0.1,0.1);
+  vec3 ks = vec3(0.2,0.2,0.2);
+  float shininess = 0.06;
+
+  vec3 normal = normalize(interpolatedNormal);
+  vec3 viewDir = normalize(-camPos);
+
+  vec3 s = normalize(vec3(lightPos) - pos);
+  vec3 r = reflect(-s,normal);
+
+  vec3 ambient = ka; // * intensity
+  vec3 diffuse = kd * max(dot(s,normal), 0.0); // * intensity
+  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess);
+
+  vec3 diffuselighting = diffusecolor * (ka + kd);
+
+  color = vec4(diffuselighting + specular, 1.0);
 }

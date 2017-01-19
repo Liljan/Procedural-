@@ -198,9 +198,10 @@ out vec3 interpolatedNormal;
 out vec2 st;
 out float height;
 
-void main(){
+out vec3 camPos;
+out vec3 pos;
 
-  //float minElevation = -0.2;
+void main(){
 
   // 0th octave
   float elevation = cnoise(frequency*(Position + seed));
@@ -210,17 +211,18 @@ void main(){
   {
   	elevation += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*(Position + seed));
   }
-
-//  vec3 pos = Position + amp * Normal * sin(frq * time + frq * Position.y);
   
   //vec3 pos = Position + amp * Normal;
   //pos += elevation * Normal * elevationModifier;
-  vec3 pos = Position + radius * Normal;
+  pos = Position + radius * Normal;
   pos += elevation * Normal * elevationModifier;
 
   //vec3 pos = Position + 0.01*Normal*sin(10.0*time+10.0*Position.y);
   gl_Position = (P * MV) * vec4(pos, 1.0);
+  camPos = mat3(MV) * Position;
+
   interpolatedNormal = mat3(MV) * Normal;
+
   st = TexCoord;  
   
   height = elevation;
