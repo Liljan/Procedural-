@@ -195,6 +195,10 @@ in vec3 pos;
 uniform float time;
 uniform sampler2D tex;
 
+uniform float light_intensity;
+uniform vec3 light_pos;
+uniform float shininess;
+
 uniform vec3 color_water_1; // water color of the planet
 uniform vec3 color_water_2; // water color of the planet
 uniform vec3 color_ground_1; // ground color of the planet
@@ -208,8 +212,6 @@ uniform float frequency;
 uniform int octaves;
 
 out vec4 color;
-
-vec4 lightPos = vec4(0.0f, 1.0f, -1.0f, 1.0f);
 
 void main() {
 
@@ -255,22 +257,20 @@ void main() {
   else
     diffusecolor = color_mountain_2;
 
-  
   //diffusecolor = vec3(0.1,0.2,0.4);
 
   vec3 kd = vec3(0.7,0.7,0.7);
   vec3 ka = vec3(0.1,0.1,0.1);
   vec3 ks = vec3(0.2,0.2,0.2);
-  float shininess = 0.06;
 
   vec3 normal = normalize(interpolatedNormal);
-  vec3 viewDir = normalize(-camPos);
+  vec3 viewDir = normalize(camPos);
 
-  vec3 s = normalize(vec3(lightPos) - pos);
+  vec3 s = normalize(vec3(light_pos) - pos);
   vec3 r = reflect(-s,normal);
 
-  vec3 ambient = ka; // * intensity
-  vec3 diffuse = kd * max(dot(s,normal), 0.0); // * intensity
+  vec3 ambient = ka * light_intensity; // * intensity
+  vec3 diffuse = kd * max(dot(s,normal), 0.0) * light_intensity; // * intensity
   vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess);
 
   vec3 diffuselighting = diffusecolor * (ka + kd);
