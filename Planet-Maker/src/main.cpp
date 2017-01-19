@@ -221,6 +221,10 @@ int main() {
 	GLint locationP_ocean = glGetUniformLocation(oceanShader.programID, "P"); // perspective matrix
 	GLint locationMV_ocean = glGetUniformLocation(oceanShader.programID, "MV"); // modelview matrix
 
+	GLint gl_light_position_ocean = glGetUniformLocation(oceanShader.programID, "light_pos");
+	GLint gl_light_intensity_ocean = glGetUniformLocation(oceanShader.programID, "light_intensity");
+	GLint gl_shininess = glGetUniformLocation(oceanShader.programID, "shininess");
+
 	// ___________________ GROUND SHADER ___________________
 
 /*	GLint locationP = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
@@ -466,6 +470,10 @@ int main() {
 		MVstack.rotX(rotation_radians[0]);
 		MVstack.rotY(rotation_radians[1]);
 		glUniformMatrix4fv(locationMV_ocean, 1, GL_FALSE, MVstack.getCurrentMatrix());
+
+		glUniform3fv(gl_light_position_ocean, 1, &light_position[0]);
+		glUniform1f(gl_light_intensity_ocean, light_intensity);
+		glUniform1f(gl_shininess, shininess);
 
 		ocean_sphere->render();
 

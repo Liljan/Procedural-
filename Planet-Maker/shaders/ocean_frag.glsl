@@ -186,14 +186,14 @@ float pnoise(vec3 P, vec3 rep)
 // MY NOT SO GLORIOUS CODE BEGINS
 
 in vec3 interpolatedNormal;
-in vec2 st;
 in float height;
 
 in vec3 camPos;
 in vec3 pos;
 
-uniform float time;
-uniform sampler2D tex;
+uniform float light_intensity;
+uniform vec3 light_pos;
+uniform float shininess;
 
 uniform int seed;
 
@@ -202,7 +202,24 @@ uniform int octaves;
 
 out vec4 color;
 
-void main() {
-  vec3 diffuselighting = vec3(0.1, 0.2, 0.4);
-  color = vec4(diffuselighting, 1.0);
+vec3 water = vec3(0.1, 0.2, 0.4);
+vec3 kd = vec3(0.7,0.7,0.7);
+vec3 ka = vec3(0.1,0.1,0.1);
+vec3 ks = vec3(0.2,0.2,0.2);
+
+void main() { 
+
+  vec3 normal = normalize(interpolatedNormal);
+  vec3 viewDir = normalize(camPos);
+
+  vec3 s = normalize(vec3(light_pos) - pos);
+  vec3 r = reflect(-s,normal);
+
+  vec3 ambient = ka * light_intensity; // * intensity
+  vec3 diffuse = kd * max(dot(s,normal), 0.0) * light_intensity; // * intensity
+  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess) * light_intensity;
+
+  vec3 diffuselighting = water * (ka + kd);
+
+  color = vec4(diffuselighting + specular, 0.7);
 }
