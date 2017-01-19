@@ -208,7 +208,7 @@ uniform vec3 color_mountain_2; // mountain color of the planet
 
 uniform int seed;
 
-uniform float frequency;
+uniform float frag_frequency;
 uniform int octaves;
 
 out vec4 color;
@@ -222,13 +222,13 @@ void main() {
   vec3 groundmix;
   vec3 mountainmix;
 
-  float noise = cnoise(frequency*vec3(height + seed));
+  float noise = cnoise(frag_frequency*vec3(pos + seed));
 
   // 1th to (n-1):th octave
-/*  for(float o = 1.0; o < octaves; o++)
+  for(float o = 1.0; o < octaves; o++)
   {
-    noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*vec3(height + seed));
-  }*/
+    noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frag_frequency*vec3(pos + seed));
+  }
 
   //vec3 groundcolor = texture(tex,st).rgb;
   //float alpha = texture(tex, st+vec2(-0.02*time, 0.0)).a;
@@ -244,10 +244,10 @@ void main() {
 
   // height: from 0 to 1
 
-  if(height < 0.02)
-    diffusecolor = color_water_1;
+  if(height < 0.005)
+    diffusecolor = watermix;
   else if(height < 0.1)
-    diffusecolor = color_water_2;
+    diffusecolor = groundmix;
   else if(height < 0.375)
     diffusecolor = color_ground_1;
   else if(height < 0.625)
@@ -256,6 +256,7 @@ void main() {
     diffusecolor = color_mountain_1;
   else
     diffusecolor = color_mountain_2;
+    
 
   //diffusecolor = vec3(0.1,0.2,0.4);
 

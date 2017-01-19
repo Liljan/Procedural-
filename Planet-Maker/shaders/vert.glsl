@@ -192,7 +192,7 @@ uniform int seed;
 uniform float radius;
 uniform float elevationModifier;
 uniform int octaves;
-uniform float frequency;
+uniform float vert_frequency;
 
 out vec3 interpolatedNormal;
 out vec2 st;
@@ -204,12 +204,12 @@ out vec3 pos;
 void main(){
 
   // 0th octave
-  float elevation = cnoise(frequency*(Position + seed));
+  float elevation = cnoise(vert_frequency*(Position + seed));
 
   // 1th to (n-1):th octave
   for(float o = 1.0; o < octaves; o++)
   {
-    elevation += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*(Position + seed));
+    elevation += 1.0 / (pow(2,o)) * cnoise((o+1.0)*vert_frequency*(Position + seed));
   }
   
   //vec3 pos = Position + amp * Normal;

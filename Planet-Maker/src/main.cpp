@@ -34,7 +34,8 @@ int segments = 32;
 float elevation = 0.1f;
 float radius = 0.01f;
 float lacunarity = 1.0f;
-float frequency = 4.0f;
+float vert_frequency = 4.0f;
+float frag_frequency = 4.0f;
 int octaves = 6;
 int seed = 0;
 
@@ -102,7 +103,7 @@ void load_file(std::string file_name)
 		infile >> elevation;
 		infile >> radius;
 		infile >> lacunarity;
-		infile >> frequency;
+		infile >> vert_frequency;
 		infile >> octaves;
 		infile >> seed;
 
@@ -138,7 +139,7 @@ void save_file(std::string file_name) {
 		outfile << elevation << std::endl;
 		outfile << radius << std::endl;
 		outfile << lacunarity << std::endl;
-		outfile << frequency << std::endl;
+		outfile << vert_frequency << std::endl;
 		outfile << octaves << std::endl;
 		outfile << seed << std::endl;
 
@@ -230,7 +231,8 @@ int main() {
 	GLfloat gl_elevation = glGetUniformLocation(proceduralShader.programID, "elevationModifier");
 	GLint gl_seed = glGetUniformLocation(proceduralShader.programID, "seed");
 	GLint gl_octaves = glGetUniformLocation(proceduralShader.programID, "octaves");
-	GLfloat gl_frequency = glGetUniformLocation(proceduralShader.programID, "frequency");
+	GLfloat gl_vert_frequency = glGetUniformLocation(proceduralShader.programID, "vert_frequency");
+	GLfloat gl_frag_frequency = glGetUniformLocation(proceduralShader.programID, "frag_frequency");
 
 	MatrixStack MVstack; MVstack.init();
 
@@ -295,7 +297,7 @@ int main() {
 				ImGui::SetTooltip("Change seed to vary the noise.");
 
 			ImGui::SliderFloat("Lacunarity", &lacunarity, 0.0f, 1.0f);
-			ImGui::SliderFloat("Frequency", &frequency, 0.1f, 10.0f);
+			ImGui::SliderFloat("Vertex Frequency", &vert_frequency, 0.1f, 10.0f);
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("Frequency of the noise.");
 
@@ -312,6 +314,11 @@ int main() {
 			if (ImGui::BeginMenu("Colors")) {
 
 				ImGui::Text("Colors");
+				ImGui::SliderFloat("Color Frequency", &frag_frequency, 0.1f, 10.0f);
+				if (show_tooltips && ImGui::IsItemHovered())
+					ImGui::SetTooltip("Frequency of the noise.");
+
+				ImGui::Spacing();
 				ImGui::ColorEdit3("Low color 1", color_water_1);
 				ImGui::ColorEdit3("Low color 2", color_water_2);
 				ImGui::ColorEdit3("Medium color 1", color_ground_1);
@@ -461,7 +468,8 @@ int main() {
 		glUniform1f(gl_elevation, elevation);
 		glUniform1i(gl_seed, seed);
 		glUniform1i(gl_octaves, octaves);
-		glUniform1f(gl_frequency, frequency);
+		glUniform1f(gl_vert_frequency, vert_frequency);
+		glUniform1f(gl_frag_frequency, frag_frequency);
 
 		glUniform3fv(gl_color_water_1, 1, &color_water_1[0]);
 		glUniform3fv(gl_color_water_2, 1, &color_water_2[0]);
