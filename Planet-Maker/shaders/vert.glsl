@@ -209,7 +209,7 @@ void main(){
   // 1th to (n-1):th octave
   for(float o = 1.0; o < octaves; o++)
   {
-  	elevation += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*(Position + seed));
+    elevation += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*(Position + seed));
   }
   
   //vec3 pos = Position + amp * Normal;

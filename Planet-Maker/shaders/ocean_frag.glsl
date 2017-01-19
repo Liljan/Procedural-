@@ -221,5 +221,5 @@ void main() {
 
   vec3 diffuselighting = water * (ka + kd);
 
-  color = vec4(diffuselighting + specular, 0.7);
+  color = vec4(diffuselighting + specular, 0.1);
 }

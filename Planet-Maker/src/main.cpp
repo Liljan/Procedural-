@@ -49,9 +49,7 @@ bool use_perlin = true;
 bool use_simplex = false;
 bool use_cell = false;
 
-Sphere* ocean_sphere;
-Sphere* ground_sphere;
-
+Sphere* sphere;
 
 void list_files()
 {
@@ -121,8 +119,8 @@ void load_file(std::string file_name)
 		infile >> use_cell;
 
 		infile.close();
-		delete ground_sphere;
-		ground_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+		delete sphere;
+		sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 	}
 	catch (const std::exception&)
 	{
@@ -214,20 +212,7 @@ int main() {
 	Shader proceduralShader;
 	proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
 
-	Shader oceanShader;
-	oceanShader.createShader("shaders/ocean_vert.glsl", "shaders/ocean_frag.glsl");
-
-	// ___________________ OCEAN SHADER ___________________
-	GLint locationP_ocean = glGetUniformLocation(oceanShader.programID, "P"); // perspective matrix
-	GLint locationMV_ocean = glGetUniformLocation(oceanShader.programID, "MV"); // modelview matrix
-
-	GLint gl_light_position_ocean = glGetUniformLocation(oceanShader.programID, "light_pos");
-	GLint gl_light_intensity_ocean = glGetUniformLocation(oceanShader.programID, "light_intensity");
-	GLint gl_shininess = glGetUniformLocation(oceanShader.programID, "shininess");
-
-	// ___________________ GROUND SHADER ___________________
-
-/*	GLint locationP = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
+	GLint locationP = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
 	GLint locationMV = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
 
 	GLint gl_light_position = glGetUniformLocation(proceduralShader.programID, "light_pos");
@@ -246,12 +231,10 @@ int main() {
 	GLint gl_seed = glGetUniformLocation(proceduralShader.programID, "seed");
 	GLint gl_octaves = glGetUniformLocation(proceduralShader.programID, "octaves");
 	GLfloat gl_frequency = glGetUniformLocation(proceduralShader.programID, "frequency");
-	*/
 
 	MatrixStack MVstack; MVstack.init();
 
-	ocean_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
-	ground_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 
 	Camera mCamera;
 	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
@@ -297,10 +280,8 @@ int main() {
 			ImGui::Separator();
 
 			if (ImGui::SliderInt("Segments", &segments, 1, 200)) {
-				delete ground_sphere;
-				delete ocean_sphere;
-				ground_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
-				ocean_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+				delete sphere;
+				sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 			}
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("The numbers of segment the mesh has.");
@@ -459,35 +440,15 @@ int main() {
 		if (draw_wireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		glUseProgram(oceanShader.programID);
-		MVstack.push();//Camera transforms --<
+		glUseProgram(proceduralShader.programID);
 
-		glUniformMatrix4fv(locationP_ocean, 1, GL_FALSE, mCamera.getPerspective());
-		MVstack.multiply(mCamera.getTransformM());
-
-		MVstack.push();
-		MVstack.translate(ocean_sphere->getPosition());
-		MVstack.rotX(rotation_radians[0]);
-		MVstack.rotY(rotation_radians[1]);
-		glUniformMatrix4fv(locationMV_ocean, 1, GL_FALSE, MVstack.getCurrentMatrix());
-
-		glUniform3fv(gl_light_position_ocean, 1, &light_position[0]);
-		glUniform1f(gl_light_intensity_ocean, light_intensity);
-		glUniform1f(gl_shininess, shininess);
-
-		ocean_sphere->render();
-
-		MVstack.pop();
-
-		//glUseProgram(proceduralShader.programID);
-/*
 		MVstack.push();//Camera transforms --<
 
 		glUniformMatrix4fv(locationP, 1, GL_FALSE, mCamera.getPerspective());
 		MVstack.multiply(mCamera.getTransformM());
 
 		MVstack.push();
-		MVstack.translate(ground_sphere->getPosition());
+		MVstack.translate(sphere->getPosition());
 		MVstack.rotX(rotation_radians[0]);
 		MVstack.rotY(rotation_radians[1]);
 		glUniformMatrix4fv(locationMV, 1, GL_FALSE, MVstack.getCurrentMatrix());
@@ -509,9 +470,9 @@ int main() {
 		glUniform3fv(gl_color_mountain_1, 1, &color_mountain_1[0]);
 		glUniform3fv(gl_color_mountain_2, 1, &color_mountain_2[0]);
 
-		ground_sphere->render();
+		sphere->render();
 
-		MVstack.pop(); */
+		MVstack.pop();
 
 		MVstack.pop(); //Camera transforms >--
 
@@ -528,7 +489,7 @@ int main() {
 	}
 
 	ImGui_ImplGlfw_Shutdown();
-	delete ground_sphere;
+	delete sphere;
 
 	return 0;
 }
