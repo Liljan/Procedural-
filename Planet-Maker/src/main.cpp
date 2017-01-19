@@ -14,12 +14,14 @@
 #include "Camera.h"
 #include "Sphere.h"
 
-void inputHandler(GLFWwindow* _window, double _dT);
-void cameraHandler(GLFWwindow* _window, double _dT, Camera* _cam);
-void GLcalls();
+void input_handler(GLFWwindow* _window, double _dT);
+void camera_handler(GLFWwindow* _window, double _dT, Camera* _cam);
+void GL_calls();
 
 static const float M_PI = 3.141592653f;
-static const char fileNameBuffer[30] = {};
+static const float DEGREE_TO_RADIAN = M_PI / 180.0f;
+static const float RADIAN_TO_DEGREE = 180.0f / M_PI;
+static const char file_name_buffer[30] = {};
 
 static char load_buffer[256] = "";
 static char save_buffer[256] = "";
@@ -48,7 +50,6 @@ bool use_simplex = false;
 bool use_cell = false;
 
 Sphere* sphere;
-
 
 void list_files()
 {
@@ -188,6 +189,11 @@ int main() {
 	// Print some info about the OpenGL context...
 	glfw.printGLInfo();
 
+	// Light related variables
+	float light_position[3] = { 1.0f, 1.0f, 1.0f };
+	float light_intensity = 1.0f;
+	float shininess = 1.0f;
+
 	// GUI related variables
 	bool show_tooltips = true;
 	bool draw_wireframe = false;
@@ -208,6 +214,10 @@ int main() {
 
 	GLint locationP = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
 	GLint locationMV = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
+
+	GLint gl_light_position = glGetUniformLocation(proceduralShader.programID, "light_pos");
+	GLint gl_light_intensity = glGetUniformLocation(proceduralShader.programID, "light_intensity");
+	GLint gl_shininess = glGetUniformLocation(proceduralShader.programID, "shininess");
 
 	GLint gl_color_water_1 = glGetUniformLocation(proceduralShader.programID, "color_water_1"); // water color of the planet
 	GLint gl_color_water_2 = glGetUniformLocation(proceduralShader.programID, "color_water_2"); // water color of the planet
@@ -314,6 +324,17 @@ int main() {
 
 			ImGui::Separator();
 
+			if (ImGui::BeginMenu("Light")) {
+				ImGui::Text("Light options");
+				ImGui::DragFloat3("Position", light_position, 0.01f, -3.0f, 3.0f);
+				ImGui::DragFloat("Intensity", &light_intensity, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Shininess", &shininess, 0.01f, 0.01f, 10.0f);
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::Separator();
+
 			if (ImGui::BeginMenu("Procedural method")) {
 				if (ImGui::Checkbox("Perlin Noise", &use_perlin)) {
 					use_simplex = use_cell = false;
@@ -397,7 +418,7 @@ int main() {
 		}
 
 		//glfw input handler
-		inputHandler(currentWindow, dT);
+		input_handler(currentWindow, dT);
 
 		if (glfwGetKey(currentWindow, GLFW_KEY_LEFT_CONTROL))
 		{
@@ -414,7 +435,7 @@ int main() {
 			fpsResetBool = false;
 		}
 
-		GLcalls();
+		GL_calls();
 
 		if (draw_wireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -431,6 +452,10 @@ int main() {
 		MVstack.rotX(rotation_radians[0]);
 		MVstack.rotY(rotation_radians[1]);
 		glUniformMatrix4fv(locationMV, 1, GL_FALSE, MVstack.getCurrentMatrix());
+
+		glUniform3fv(gl_light_position, 1, &light_position[0]);
+		glUniform1f(gl_light_intensity, light_intensity);
+		glUniform1f(gl_shininess, shininess);
 
 		glUniform1f(gl_radius, radius);
 		glUniform1f(gl_elevation, elevation);
@@ -470,14 +495,14 @@ int main() {
 }
 
 
-void inputHandler(GLFWwindow* _window, double _dT)
+void input_handler(GLFWwindow* _window, double _dT)
 {
 	if (glfwGetKey(_window, GLFW_KEY_ESCAPE)) {
 		glfwSetWindowShouldClose(_window, GL_TRUE);
 	}
 }
 
-void GLcalls()
+void GL_calls()
 {
 	glClearColor(0.01f, 0.01f, 0.01f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
