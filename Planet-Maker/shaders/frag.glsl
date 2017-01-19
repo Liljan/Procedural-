@@ -186,14 +186,12 @@ float pnoise(vec3 P, vec3 rep)
 // MY NOT SO GLORIOUS CODE BEGINS
 
 in vec3 interpolatedNormal;
-in vec2 st;
 in float height;
 
 in vec3 camPos;
 in vec3 pos;
 
 uniform float time;
-uniform sampler2D tex;
 
 uniform float light_intensity;
 uniform vec3 light_pos;
@@ -276,5 +274,8 @@ void main() {
 
   vec3 diffuselighting = diffusecolor * (ka + kd);
 
-  color = vec4(diffuselighting + specular, 1.0);
+  if(height < 0.1)
+    color = vec4(diffuselighting + specular, 1.0);
+  else
+    color = vec4(diffuselighting, 1.0);
 }
