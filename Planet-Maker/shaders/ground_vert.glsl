@@ -180,100 +180,50 @@ float pnoise(vec3 P, vec3 rep)
   return 2.2 * n_xyz;
 }
 
-// END OF SMART NOISE FUNCTIONS
+layout(location = 0) in vec3 Position;
+layout(location = 1) in vec3 Normal;
+layout(location = 2) in vec2 TexCoord;
 
-
-// MY NOT SO GLORIOUS CODE BEGINS
-
-in vec3 interpolatedNormal;
-in vec2 st;
-in float height;
-
-in vec3 camPos;
-in vec3 pos;
-
+uniform mat4 MV;
+uniform mat4 P;
 uniform float time;
-uniform sampler2D tex;
-
-uniform float light_intensity;
-uniform vec3 light_pos;
-uniform float shininess;
-
-uniform vec3 color_water_1; // water color of the planet
-uniform vec3 color_water_2; // water color of the planet
-uniform vec3 color_ground_1; // ground color of the planet
-uniform vec3 color_ground_2; // ground color of the planet
-uniform vec3 color_mountain_1; // mountain color of the planet
-uniform vec3 color_mountain_2; // mountain color of the planet
 
 uniform int seed;
-
-uniform float frequency;
+uniform float radius;
+uniform float elevationModifier;
 uniform int octaves;
+uniform float frequency;
 
-out vec4 color;
+out vec3 interpolatedNormal;
+out vec2 st;
+out float height;
 
-void main() {
+out vec3 camPos;
+out vec3 pos;
 
-  //vec3 mixLava = mix(color_low,color_glow,cnoise( vec3(height) * 0.8));
-  //vec3 mixMtn = mix(color_high,color_med, cnoise( 2.0 * vec3(10.0*height) ) );
+void main(){
 
-  vec3 watermix;
-  vec3 groundmix;
-  vec3 mountainmix;
-
-  float noise = cnoise(frequency*vec3(height + seed));
+  // 0th octave
+  float elevation = cnoise(frequency*(Position + seed));
 
   // 1th to (n-1):th octave
-/*  for(float o = 1.0; o < octaves; o++)
+  for(float o = 1.0; o < octaves; o++)
   {
-    noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*vec3(height + seed));
-  }*/
+  	elevation += o / (pow(2,o)) * cnoise((o+1.0)*frequency*(Position + seed));
+  }
+  
+  //vec3 pos = Position + amp * Normal;
+  //pos += elevation * Normal * elevationModifier;
+  pos = Position + radius * Normal;
+  pos += elevation * Normal * elevationModifier;
 
-  //vec3 groundcolor = texture(tex,st).rgb;
-  //float alpha = texture(tex, st+vec2(-0.02*time, 0.0)).a;
-  //vec3 cloudcolor = vec3(1.0, 1.0, 1.0);  
+  //vec3 pos = Position + 0.01*Normal*sin(10.0*time+10.0*Position.y);
+  gl_Position = (P * MV) * vec4(pos, 1.0);
+  camPos = mat3(MV) * Position;
 
-  watermix = mix(color_water_1, color_water_2, noise);
-  groundmix = mix(color_ground_1,color_ground_2, noise);
-  mountainmix = mix(color_mountain_1,color_mountain_2, noise);
+  interpolatedNormal = mat3(MV) * Normal;
 
-  vec3 diffusecolor;
-
-  //diffusecolor = watermix;
-
-  // height: from 0 to 1
-
-  if(height < 0.02)
-    diffusecolor = color_water_1;
-  else if(height < 0.1)
-    diffusecolor = color_water_2;
-  else if(height < 0.375)
-    diffusecolor = color_ground_1;
-  else if(height < 0.625)
-    diffusecolor = color_ground_2;
-  else if(height < 0.75)
-    diffusecolor = color_mountain_1;
-  else
-    diffusecolor = color_mountain_2;
-
-  //diffusecolor = vec3(0.1,0.2,0.4);
-
-  vec3 kd = vec3(0.7,0.7,0.7);
-  vec3 ka = vec3(0.1,0.1,0.1);
-  vec3 ks = vec3(0.2,0.2,0.2);
-
-  vec3 normal = normalize(interpolatedNormal);
-  vec3 viewDir = normalize(camPos);
-
-  vec3 s = normalize(vec3(light_pos) - pos);
-  vec3 r = reflect(-s,normal);
-
-  vec3 ambient = ka * light_intensity; // * intensity
-  vec3 diffuse = kd * max(dot(s,normal), 0.0) * light_intensity; // * intensity
-  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess);
-
-  vec3 diffuselighting = diffusecolor * (ka + kd);
-
-  color = vec4(diffuselighting + specular, 1.0);
+  st = TexCoord;  
+  
+  height = elevation;
 }

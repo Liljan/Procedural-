@@ -21,9 +21,14 @@ public:
 
 	glm::vec3 getNormal() { return normal; }
 	void setNormal(glm::vec3 n) { normal = n; }
+	void setOrientation(glm::vec3 o) { orientation = o; }
+	glm::vec3* getPosition() { return &position; }
+	void setAngularPosition(float a) { angularPosition = a; }
 
 	void render();
 	glm::vec2 getDim() { return dim; }
+	glm::vec3 getOrientation() { return orientation; }
+	float getAngularPosition() { return angularPosition; }
 
 private:
 	GLuint vao;          // Vertex array object, the main handle for geometry
@@ -41,4 +46,5 @@ private:
 
 	glm::vec3 orientation;
 	glm::vec3 rotAxis;
+	float angularPosition;
 };

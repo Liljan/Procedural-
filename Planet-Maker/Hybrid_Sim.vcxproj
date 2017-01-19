@@ -39,9 +39,9 @@
     <ClInclude Include="include\glfwContext.h" />
     <ClInclude Include="include\MatrixStack.h" />
     <ClInclude Include="include\Parameters.h" />
+    <ClInclude Include="include\Plane.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\Sphere.h" />
-    <ClInclude Include="Plane.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -103,17 +103,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\include;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external\imgui;$(IncludePath)</IncludePath>
-    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\external;C:\Users\XxX_DEATH_LORD_1337\Documents\Fluidsim\Hybrid_Sim\include;$(IncludePath)</IncludePath>
-    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external\imgui;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\include;C:\Users\Big Boss\Documents\Procedural-\Planet-Maker\external;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
