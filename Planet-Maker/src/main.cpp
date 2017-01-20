@@ -13,6 +13,7 @@
 #include "MatrixStack.h"
 #include "Camera.h"
 #include "Sphere.h"
+#include "Plane.h"
 
 void input_handler(GLFWwindow* _window, double _dT);
 void camera_handler(GLFWwindow* _window, double _dT, Camera* _cam);
@@ -28,6 +29,8 @@ static char save_buffer[256] = "";
 static char files_buffer[1024] = "";
 
 static const std::string FILE_ENDING = ".ass";
+
+static glm::vec3* background_pos = new glm::vec3(0.0f, 0.0f, 3.0f);
 
 // ________ TERRAIN _________
 // Procedural related variables
@@ -61,6 +64,7 @@ int sky_octaves = 6;
 
 Sphere* sphere;
 Sphere* sky_sphere;
+Plane* stars;
 
 void list_files()
 {
@@ -265,14 +269,24 @@ int main() {
 	GLint gl_sky_octaves = glGetUniformLocation(sky_shader.programID, "octaves");
 	GLint gl_sky_seed = glGetUniformLocation(sky_shader.programID, "seed");
 
+	// __________ STAR BACKGROUND ______________
+
+	Shader stars_shader;
+	stars_shader.createShader("shaders/stars_vert.glsl", "shaders/stars_frag.glsl");
+
+	GLint locationP_stars = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
+	GLint locationMV_stars = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
+
 	// _____________________________________________________
 	MatrixStack MVstack; MVstack.init();
 
 	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 	sky_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
+	stars = new Plane(0.0f, 0.0f, -3.0f, 100000.0f, 100000.0f);
 
 	Camera mCamera;
 	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
+	//mCamera.setDirection(&glm::vec3(0.f, 0.f, -1.f));
 	mCamera.update();
 
 	// RENDER LOOP \__________________________________________/
@@ -556,6 +570,18 @@ int main() {
 			MVstack.pop();
 		}
 
+		// STARS SHADER
+		glUseProgram(stars_shader.programID);
+		glUniformMatrix4fv(locationP_stars, 1, GL_FALSE, mCamera.getPerspective());
+
+		MVstack.push();
+		MVstack.translate(background_pos);
+		glUniformMatrix4fv(locationMV_stars, 1, GL_FALSE, MVstack.getCurrentMatrix());
+
+		stars->render();
+
+		MVstack.pop();
+
 		MVstack.pop(); //Camera transforms >--
 
 		glUseProgram(0);
@@ -568,6 +594,8 @@ int main() {
 		ImGui::Render();
 
 		glfwSwapBuffers(currentWindow);
+
+		//std::cout << mCamera.getTransformM() << std::endl;
 	}
 
 	ImGui_ImplGlfw_Shutdown();

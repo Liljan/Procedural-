@@ -83,6 +83,11 @@ void Camera::setPosition(glm::vec3* _Position)
 	position = *_Position;
 }
 
+void Camera::setDirection(glm::vec3* _Direction)
+{
+	direction = *_Direction;
+}
+
 void Camera::setTransform(glm::mat4* _Transform)
 {
 	transform = *_Transform;
@@ -147,5 +152,4 @@ void Camera::fpsCamera(GLFWwindow* _window, double _dT)
 	}
 
 	glfwSetCursorPos(_window, 960, 540);
-
 }

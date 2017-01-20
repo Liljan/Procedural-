@@ -1,10 +1,10 @@
 #include "Plane.h"
 
-Plane::Plane(float x, float y, float z, float dX, float dZ) {
+Plane::Plane(float x, float y, float z, float dX, float dY) {
 	position[0] = x;
 	position[1] = y;
 	position[2] = z;
-	createPlane(dX, dZ);
+	createPlane(dX, dY);
 }
 
 
@@ -12,14 +12,14 @@ Plane::~Plane(void)
 {
 }
 
-void Plane::createPlane(float dX, float dZ) {
+void Plane::createPlane(float dX, float dY) {
 
 	GLfloat vertex_array_data[] = {
 		//		Vertex										Normals						Texture  
-		-dX / 2.0f,  0.0f,  -dZ / 2.0f,						0.0f, 1.0f, 0.0f,			0, 1,
-		dX / 2.0f,  0.0f,  -dZ / 2.0f,						0.0f, 1.0f, 0.0f,			0, 0,
-		dX / 2.0f,  0.0f,   dZ / 2.0f,						0.0f, 1.0f, 0.0f,			1, 0,
-		-dX / 2.0f,  0.0f,   dZ / 2.0f,						0.0f, 1.0f, 0.0f,			1, 1,
+		-dX / 2.0f, -dY / 2.0f, 0.0f,						0.0f, 0.0f, 1.0f,			0, 1,
+		dX / 2.0f, -dY / 2.0f, 0.0f,  						0.0f, 0.0f, 1.0f,			0, 0,
+		dX / 2.0f, dY / 2.0f, 0.0f,   						0.0f, 0.0f, 1.0f,			1, 0,
+		-dX / 2.0f,  dY / 2.0f, 0.0f,   					0.0f, 0.0f, 1.0f,			1, 1,
 	};
 
 	static const GLuint index_array_data[] = {

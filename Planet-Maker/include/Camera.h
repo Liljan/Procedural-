@@ -23,6 +23,7 @@ public:
 	void translate(glm::vec3* _Translation);
 
 	void setPosition(glm::vec3* _Position);
+	void setDirection(glm::vec3* _Direction);
 
 	void setTransform(glm::mat4* _Transform);
 	void setPerspective(glm::mat4* _Perspective);

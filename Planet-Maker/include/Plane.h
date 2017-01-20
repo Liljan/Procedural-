@@ -1,5 +1,6 @@
 #pragma once
 #include "GL/glew.h"
+#include "glm\glm.hpp"
 
 class Plane
 {
@@ -19,7 +20,7 @@ public:
 		position[2] = 0.0f;
 	};
 
-	Plane(float x, float y, float z, float dX, float dZ);
+	Plane(float x, float y, float z, float dX, float dY);
 	~Plane(void);
 
 	void render();
@@ -34,7 +35,6 @@ private:
 	GLuint *indexarray;   // Element index array
 
 	float position[4];
-
 
 	void createPlane(float xSize, float zSize);
 };
