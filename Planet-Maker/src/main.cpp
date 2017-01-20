@@ -201,6 +201,7 @@ int main() {
 	bool draw_wireframe = false;
 
 	// Time related variables
+	float time;
 	bool is_paused = false;
 	bool fpsResetBool = false;
 
@@ -245,11 +246,12 @@ int main() {
 	GLint locationP_sky = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
 	GLint locationMV_sky = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
 
+	GLint gl_sky_time = glGetUniformLocation(sky_shader.programID, "time");
 
 	MatrixStack MVstack; MVstack.init();
 
 	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
-	sky_sphere = new Sphere(2.0f, 0.0f, 0.0f, 1.0f, 32);
+	sky_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
 
 	Camera mCamera;
 	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
@@ -503,6 +505,11 @@ int main() {
 		MVstack.push();
 		MVstack.translate(sky_sphere->getPosition());
 		glUniformMatrix4fv(locationMV_sky, 1, GL_FALSE, MVstack.getCurrentMatrix());
+
+		// update time
+		time = (float)glfwGetTime();
+		glUniform1f(gl_sky_time, time);
+
 		sky_sphere->render();
 
 		MVstack.pop();

@@ -11,10 +11,12 @@ out vec3 interpolatedNormal;
 out vec3 pos;
 
 void main(){
-  //float height = 1.0;
+  float height = 0.2;
 
-  vec3 pos = Position;
+  pos = Position + 0.02 * Normal;
+  pos += height * Normal;
+
   gl_Position = (P * MV) * vec4(pos, 1.0);
 
-  interpolatedNormal = mat3(MV) * Normal;  
+  interpolatedNormal = mat3(MV) * Normal;
 }

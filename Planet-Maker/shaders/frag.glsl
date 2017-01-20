@@ -255,7 +255,6 @@ void main() {
   else
     diffusecolor = color_mountain_2;
     
-
   //diffusecolor = vec3(0.1,0.2,0.4);
 
   vec3 kd = vec3(0.7,0.7,0.7);
