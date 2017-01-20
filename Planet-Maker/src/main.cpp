@@ -51,6 +51,7 @@ bool use_simplex = false;
 bool use_cell = false;
 
 Sphere* sphere;
+Sphere* sky_sphere;
 
 void list_files()
 {
@@ -210,6 +211,8 @@ int main() {
 	float rotation_degrees[2] = { 0.0f,0.0f };
 	float rotation_radians[2] = { 0.0f,0.0f };
 
+	// __________ TERRAIN ______________
+
 	Shader proceduralShader;
 	proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
 
@@ -234,9 +237,19 @@ int main() {
 	GLfloat gl_vert_frequency = glGetUniformLocation(proceduralShader.programID, "vert_frequency");
 	GLfloat gl_frag_frequency = glGetUniformLocation(proceduralShader.programID, "frag_frequency");
 
+	// __________ SKY ______________
+
+	Shader sky_shader;
+	sky_shader.createShader("shaders/sky_vert.glsl", "shaders/sky_frag.glsl");
+
+	GLint locationP_sky = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
+	GLint locationMV_sky = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
+
+
 	MatrixStack MVstack; MVstack.init();
 
 	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+	sky_sphere = new Sphere(2.0f, 0.0f, 0.0f, 1.0f, 32);
 
 	Camera mCamera;
 	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
@@ -454,6 +467,7 @@ int main() {
 		glUniformMatrix4fv(locationP, 1, GL_FALSE, mCamera.getPerspective());
 		MVstack.multiply(mCamera.getTransformM());
 
+		// _________ PLANET __________
 		MVstack.push();
 		MVstack.translate(sphere->getPosition());
 		MVstack.rotX(rotation_radians[0]);
@@ -479,6 +493,17 @@ int main() {
 		glUniform3fv(gl_color_mountain_2, 1, &color_mountain_2[0]);
 
 		sphere->render();
+
+		MVstack.pop();
+
+		// SKY SHADER
+		glUseProgram(sky_shader.programID);
+		glUniformMatrix4fv(locationP_sky, 1, GL_FALSE, mCamera.getPerspective());
+		
+		MVstack.push();
+		MVstack.translate(sky_sphere->getPosition());
+		glUniformMatrix4fv(locationMV_sky, 1, GL_FALSE, MVstack.getCurrentMatrix());
+		sky_sphere->render();
 
 		MVstack.pop();
 
