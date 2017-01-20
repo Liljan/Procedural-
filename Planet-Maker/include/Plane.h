@@ -1,6 +1,5 @@
 #pragma once
-#include "Gl/glew.h"
-#include "glm/glm.hpp"
+#include "GL/glew.h"
 
 class Plane
 {
@@ -10,20 +9,20 @@ public:
 		vao = 0;
 		vertexbuffer = 0;
 		indexbuffer = 0;
-		vertexarray = NULL;
-		indexarray = NULL;
+		vertexarray = nullptr;
+		indexarray = nullptr;
 		nverts = 0;
 		ntris = 0;
+
+		position[0] = 0.0f;
+		position[1] = 0.0f;
+		position[2] = 0.0f;
 	};
 
-	Plane(float x, float y, float z, float width, float height);
+	Plane(float x, float y, float z, float dX, float dZ);
 	~Plane(void);
 
-	glm::vec3 getNormal() { return normal; }
-	void setNormal(glm::vec3 n) { normal = n; }
-
 	void render();
-	glm::vec2 getDim() { return dim; }
 
 private:
 	GLuint vao;          // Vertex array object, the main handle for geometry
@@ -34,11 +33,8 @@ private:
 	GLfloat *vertexarray; // Vertex array on interleaved format: x y z nx ny nz s t
 	GLuint *indexarray;   // Element index array
 
-	glm::vec2 dim;
-	glm::vec3 normal;
+	float position[4];
 
-	glm::vec3 position;
 
-	glm::vec3 orientation;
-	glm::vec3 rotAxis;
+	void createPlane(float xSize, float zSize);
 };
