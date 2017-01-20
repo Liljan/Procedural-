@@ -184,6 +184,10 @@ in vec3 interpolatedNormal;
 in vec3 pos;
 
 uniform float time;
+uniform float speed;
+uniform int seed;
+uniform int octaves;
+uniform float frequency;
 
 out vec4 color;
 
@@ -191,20 +195,17 @@ void main() {
 
   vec3 diffusecolor = vec3(1.0,1.0,1.0);
 
-  float frequency = 4.0f;
-  float seed = 0.0f;
-  int octaves = 7;
   float opacity;
 
-  float noise = cnoise(frequency*vec3(pos + seed + 0.1*time));
+  float noise = cnoise(frequency*vec3(pos + seed + 0.1 * speed * time));
 
   // 1th to (n-1):th octave
   for(float o = 1.0; o < octaves; o++)
   {
-    noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frequency*vec3(pos + seed + 0.1*time));
+    noise += 1.0 / (pow(2, o)) * cnoise((o + 1.0) * frequency * vec3(pos + seed + 0.1 * speed * time));
   }
 
   opacity = noise;
 
-  color = vec4(diffusecolor, opacity);
+  color = vec4(diffusecolor,opacity);
 }

@@ -29,6 +29,7 @@ static char files_buffer[1024] = "";
 
 static const std::string FILE_ENDING = ".ass";
 
+// ________ TERRAIN _________
 // Procedural related variables
 int segments = 32;
 float elevation = 0.1f;
@@ -49,6 +50,14 @@ float color_mountain_2[3] = { 0.05f,0.01f,0.03f };
 bool use_perlin = true;
 bool use_simplex = false;
 bool use_cell = false;
+
+// ________ SKY _________
+// Procedural related variables
+bool enable_sky = true;
+
+float sky_frequency = 4.0f;
+int sky_seed = 0;
+int sky_octaves = 6;
 
 Sphere* sphere;
 Sphere* sky_sphere;
@@ -202,6 +211,7 @@ int main() {
 
 	// Time related variables
 	float time;
+	float sky_speed = 1.0f;
 	bool is_paused = false;
 	bool fpsResetBool = false;
 
@@ -246,8 +256,16 @@ int main() {
 	GLint locationP_sky = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
 	GLint locationMV_sky = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
 
-	GLint gl_sky_time = glGetUniformLocation(sky_shader.programID, "time");
+	GLint gl_sky_radius = glGetUniformLocation(sky_shader.programID, "radius");
+	GLfloat gl_sky_elevation = glGetUniformLocation(sky_shader.programID, "elevationModifier");
 
+	GLint gl_sky_time = glGetUniformLocation(sky_shader.programID, "time");
+	GLint gl_sky_speed = glGetUniformLocation(sky_shader.programID, "speed");
+	GLint gl_sky_frequency = glGetUniformLocation(sky_shader.programID, "frequency");
+	GLint gl_sky_octaves = glGetUniformLocation(sky_shader.programID, "octaves");
+	GLint gl_sky_seed = glGetUniformLocation(sky_shader.programID, "seed");
+
+	// _____________________________________________________
 	MatrixStack MVstack; MVstack.init();
 
 	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
@@ -296,6 +314,8 @@ int main() {
 			ImGui::Text("Procedural Planet Maker");
 			ImGui::Separator();
 
+			ImGui::Text("Geometry");
+
 			if (ImGui::SliderInt("Segments", &segments, 1, 200)) {
 				delete sphere;
 				sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
@@ -340,6 +360,20 @@ int main() {
 				ImGui::ColorEdit3("Medium color 2", color_ground_2);
 				ImGui::ColorEdit3("High color 1", color_mountain_1);
 				ImGui::ColorEdit3("High color 2", color_mountain_2);
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::BeginMenu("Clouds")) {
+
+				ImGui::Text("Clouds");
+				ImGui::Checkbox("Enable clouds", &enable_sky);
+				ImGui::SliderInt("Octaves", &sky_octaves, 1, 10);
+				ImGui::SliderFloat("Frequency", &sky_frequency, 0.01f, 10.0f);
+				ImGui::SliderInt("Seed", &sky_seed, 0, 10000);
+				ImGui::SliderFloat("Speed", &sky_speed, 0.0f, 2.0f);
 
 				ImGui::EndMenu();
 			}
@@ -499,20 +533,28 @@ int main() {
 		MVstack.pop();
 
 		// SKY SHADER
-		glUseProgram(sky_shader.programID);
-		glUniformMatrix4fv(locationP_sky, 1, GL_FALSE, mCamera.getPerspective());
-		
-		MVstack.push();
-		MVstack.translate(sky_sphere->getPosition());
-		glUniformMatrix4fv(locationMV_sky, 1, GL_FALSE, MVstack.getCurrentMatrix());
+		if (enable_sky) {
+			glUseProgram(sky_shader.programID);
+			glUniformMatrix4fv(locationP_sky, 1, GL_FALSE, mCamera.getPerspective());
 
-		// update time
-		time = (float)glfwGetTime();
-		glUniform1f(gl_sky_time, time);
+			MVstack.push();
+			MVstack.translate(sky_sphere->getPosition());
+			glUniformMatrix4fv(locationMV_sky, 1, GL_FALSE, MVstack.getCurrentMatrix());
 
-		sky_sphere->render();
+			// update time
+			time = (float)glfwGetTime();
+			glUniform1f(gl_sky_time, time);
+			glUniform1f(gl_sky_speed, sky_speed);
+			glUniform1f(gl_sky_radius, radius);
+			glUniform1f(gl_sky_elevation, elevation);
+			glUniform1i(gl_sky_seed, sky_seed);
+			glUniform1f(gl_sky_frequency, sky_frequency);
+			glUniform1i(gl_sky_octaves, sky_octaves);
 
-		MVstack.pop();
+			sky_sphere->render();
+
+			MVstack.pop();
+		}
 
 		MVstack.pop(); //Camera transforms >--
 

@@ -6,14 +6,17 @@ layout(location = 1) in vec3 Normal;
 uniform mat4 MV;
 uniform mat4 P;
 
+uniform float radius;
+uniform float elevationModifier;
+
 out vec3 interpolatedNormal;
 
 out vec3 pos;
 
 void main(){
-  float height = 0.2;
+  float height = elevationModifier;
 
-  pos = Position + 0.02 * Normal;
+  pos = Position + radius * Normal;
   pos += height * Normal;
 
   gl_Position = (P * MV) * vec4(pos, 1.0);
