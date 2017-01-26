@@ -9,7 +9,7 @@
 class CustomPlane
 {
 public:
-	CustomPlane(GLfloat skybox_scale);
+	CustomPlane(GLfloat skybox_scale, glm::vec3 position, float angle, glm::vec3 rotation);
 	~CustomPlane();
 
 	void render();
@@ -19,6 +19,7 @@ public:
 	GLuint VBO, VAO;
 
 	glm::vec3 m_position;
+	float m_angle;
 	glm::vec3 m_rotation;
 
 	GLfloat scale;

@@ -1,6 +1,6 @@
 #include "CustomPlane.h"
 
-CustomPlane::CustomPlane(GLfloat skybox_scale)
+CustomPlane::CustomPlane(GLfloat skybox_scale, glm::vec3 position, float angle, glm::vec3 rotation)
 {
 	// Set up our vertex data (and buffer(s)) and attribute pointers
 	GLfloat vertices[] = {
@@ -28,6 +28,10 @@ CustomPlane::CustomPlane(GLfloat skybox_scale)
 	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0); // Unbind VAO
+
+	m_position = position;
+	m_angle = angle;
+	m_rotation = rotation;
 }
 
 

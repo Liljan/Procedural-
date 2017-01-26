@@ -1,5 +1,6 @@
 // Std. Includes
 #include <string>
+#include <vector>
 
 // GLEW
 //#define GLEW_STATIC
@@ -18,9 +19,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// Constants
+const float M_PI = 3.14159265f;
+const float M_PI_HALF = 1.57079632679f;
+
 // Properties
 GLuint WIDTH = 1920, HEIGHT = 1080;
-GLfloat skybox_scale = 10.0f;
+//GLfloat skybox_scale = 10.0f;
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scan_code, int action, int mode);
@@ -35,7 +40,8 @@ GLfloat last_x = WIDTH / 2.0f, last_y = HEIGHT / 2.f;
 bool first_mouse = true;
 
 // Objects
-CustomPlane* background_plane;
+std::vector<CustomPlane*> skybox;
+float scale = 1.0f;
 
 GLfloat delta_time = 0.0f;
 GLfloat last_time = 0.0f;
@@ -76,7 +82,14 @@ int main()
 	Shader star_shader("shaders/star_vert.glsl", "shaders/star_frag.glsl");
 
 	// Initialize geometry objects
-	background_plane = new CustomPlane(10.0f);
+
+	// Init background
+	skybox.push_back(new CustomPlane(scale, glm::vec3(0, 0, scale/2.f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f))); // front
+	skybox.push_back(new CustomPlane(scale, glm::vec3(0, 0, -scale/2.f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f))); //back
+	skybox.push_back(new CustomPlane(scale, glm::vec3(0, scale/2.f, 0.0f), M_PI_HALF, glm::vec3(1.0f, 0.0f, 0.0f))); //top
+	skybox.push_back(new CustomPlane(scale, glm::vec3(0, -scale/2.f, 0.0f), M_PI_HALF, glm::vec3(1.0f, 0.0f, 0.0f))); //bottom
+	skybox.push_back(new CustomPlane(scale, glm::vec3(scale / 2.f,0.0f , 0.0f), M_PI_HALF, glm::vec3(0.0f, 1.0f, 0.0f))); // right
+	skybox.push_back(new CustomPlane(scale, glm::vec3(-scale / 2.f, 0.0f, 0.0f), M_PI_HALF, glm::vec3(0.0f, 1.0f, 0.0f))); // left
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -91,14 +104,13 @@ int main()
 		camera_movement();
 
 		// Clear the colorbuffer
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Create camera and projection
-		glm::mat4 view, projection, model;
+		glm::mat4 view, projection;
 		view = camera.GetViewMatrix();
 		projection = glm::perspective(camera.zoom, (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
-
 
 		// ______________ Background plane ________________
 
@@ -113,18 +125,35 @@ int main()
 		// Pass the matrices to the shader
 		glUniformMatrix4fv(Loc_view, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(Loc_projection, 1, GL_FALSE, glm::value_ptr(projection));
-		model = glm::translate(model, glm::vec3(0,0,0));
-		model = glm::rotate(model, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+
+		/*model = glm::translate(model, background_plane->m_position);
+		model = glm::rotate(model, background_plane->m_angle, background_plane->m_rotation);
+		glUniformMatrix4fv(Loc_model, 1, GL_FALSE, glm::value_ptr(model));
+
+		background_plane->render();
+
+		model = glm::translate(model, glm::vec3(0,0,3));
+		model = glm::rotate(model, 0.13f, background_plane->m_rotation);
 		glUniformMatrix4fv(Loc_model, 1, GL_FALSE, glm::value_ptr(model));
 		// render plane HERE!
 
-		background_plane->render();
+		background_plane->render();*/
+
+		for (int i = 0; i < skybox.size(); ++i) {
+			glm::mat4 model;
+			model = glm::translate(model, skybox[i]->m_position);
+			model = glm::rotate(model, skybox[i]->m_angle, skybox[i]->m_rotation);
+			glUniformMatrix4fv(Loc_model, 1, GL_FALSE, glm::value_ptr(model));
+			// render plane HERE!
+
+			skybox[i]->render();
+		}
 
 		// Swap the buffers
 		glfwSwapBuffers(window);
 	}
 	// Properly de-allocate all resources once they've outlived their purpose
-	delete background_plane;
+	//delete background_plane;
 
 
 	glfwTerminate();
