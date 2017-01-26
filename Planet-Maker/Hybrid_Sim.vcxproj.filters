@@ -39,9 +39,6 @@
     <ClCompile Include="external\imgui\imgui_impl_glfw.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\Plane.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\CustomPlane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -75,9 +72,6 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Plane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\CustomCamera.h">
