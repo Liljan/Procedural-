@@ -18,22 +18,23 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // Properties
-GLuint screenWidth = 800, screenHeight = 600;
+GLuint WIDTH = 800, HEIGHT = 600;
+GLfloat skybox_scale = 10.0f;
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void Do_Movement();
+void camera_movement();
 
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 bool keys[1024];
-GLfloat lastX = 400, lastY = 300;
-bool firstMouse = true;
+GLfloat last_x = WIDTH/2.0f, last_y = HEIGHT/2.f;
+bool first_mouse = true;
 
-GLfloat deltaTime = 0.0f;
-GLfloat lastFrame = 0.0f;
+GLfloat delta_time = 0.0f;
+GLfloat last_time = 0.0f;
 
 // The MAIN function, from here we start our application and run our Game loop
 int main()
@@ -46,7 +47,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "LearnOpenGL", nullptr, nullptr); // Windowed
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Procedural Planet Generator", nullptr, nullptr); // Windowed
 	glfwMakeContextCurrent(window);
 
 	// Set the required callback functions
@@ -62,25 +63,25 @@ int main()
 	glewInit();
 
 	// Define the viewport dimensions
-	glViewport(0, 0, screenWidth, screenHeight);
+	glViewport(0, 0, WIDTH, HEIGHT);
 
 	// Setup some OpenGL options
 	glEnable(GL_DEPTH_TEST);
 
 	// Setup and compile our shaders
-	Shader ourShader("shaders/star_vert.glsl", "shaders/star_frag.glsl");
+	Shader star_shader("shaders/star_vert.glsl", "shaders/star_frag.glsl");
 
 	// Set up our vertex data (and buffer(s)) and attribute pointers
 	GLfloat vertices[] = {
 		// First triangle
-		0.5f,  0.5f, 0.0f,  // Top Right
-		0.5f, -0.5f, 0.0f,  // Bottom Right
-		-0.5f,  0.5f, 0.0f,  // Top Left
+		0.5f * skybox_scale,  0.5f * skybox_scale, 0.0f,  // Top Right
+		0.5f * skybox_scale, -0.5f * skybox_scale, 0.0f,  // Bottom Right
+		-0.5f * skybox_scale,  0.5f * skybox_scale, 0.0f,  // Top Left
 
 		// Second triangle
-		0.5f, -0.5f, 0.0f,  // Bottom Right
-		-0.5f, -0.5f, 0.0f,  // Bottom Left
-		-0.5f,  0.5f, 0.0f   // Top Left
+		0.5f * skybox_scale, -0.5f * skybox_scale, 0.0f,  // Bottom Right
+		-0.5f * skybox_scale, -0.5f * skybox_scale, 0.0f,  // Bottom Left
+		-0.5f * skybox_scale,  0.5f * skybox_scale, 0.0f   // Top Left
 	};
 
 	GLuint VBO, VAO;
@@ -103,41 +104,41 @@ int main()
 	{
 		// Set frame time
 		GLfloat currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		delta_time = currentFrame - last_time;
+		last_time = currentFrame;
 
 		// Check and call events
 		glfwPollEvents();
-		Do_Movement();
+		camera_movement();
 
 		// Clear the colorbuffer
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Draw our first triangle
-		ourShader.Use();
+		star_shader.Use();
 
 		// Create camera transformation
 		glm::mat4 view;
 		view = camera.GetViewMatrix();
 		glm::mat4 projection;
-		projection = glm::perspective(camera.zoom, (float)screenWidth / (float)screenHeight, 0.1f, 1000.0f);
+		projection = glm::perspective(camera.zoom, (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
 		// Get the uniform locations
-		GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
-		GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
-		GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
+		GLint Loc_model = glGetUniformLocation(star_shader.Program, "model");
+		GLint Loc_view = glGetUniformLocation(star_shader.Program, "view");
+		GLint Loc_projection = glGetUniformLocation(star_shader.Program, "projection");
 		// Pass the matrices to the shader
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(Loc_view, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(Loc_projection, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(VAO);
 
 		// Calculate the model matrix for each object and pass it to shader before drawing
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0, 0, 0));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(Loc_model, 1, GL_FALSE, glm::value_ptr(model));
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glBindVertexArray(0);
 		// Swap the buffers
@@ -151,21 +152,21 @@ int main()
 }
 
 // Moves/alters the camera positions based on user input
-void Do_Movement()
+void camera_movement()
 {
 	// Camera controls
 	if (keys[GLFW_KEY_W])
-		camera.process_keyboard(FORWARD, deltaTime);
+		camera.process_keyboard(FORWARD, delta_time);
 	if (keys[GLFW_KEY_S])
-		camera.process_keyboard(BACKWARD, deltaTime);
+		camera.process_keyboard(BACKWARD, delta_time);
 	if (keys[GLFW_KEY_A])
-		camera.process_keyboard(LEFT, deltaTime);
+		camera.process_keyboard(LEFT, delta_time);
 	if (keys[GLFW_KEY_D])
-		camera.process_keyboard(RIGHT, deltaTime);
+		camera.process_keyboard(RIGHT, delta_time);
 }
 
 // Is called whenever a key is pressed/released via GLFW
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+void key_callback(GLFWwindow* window, int key, int scan_code, int action, int mode)
 {
 	//cout << key << endl;
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -179,26 +180,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+void mouse_callback(GLFWwindow* window, double x_pos, double y_pos)
 {
-	if (firstMouse)
+	if (first_mouse)
 	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
+		last_x = x_pos;
+		last_y = y_pos;
+		first_mouse = false;
 	}
 
-	GLfloat xoffset = xpos - lastX;
-	GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+	GLfloat xoffset = x_pos - last_x;
+	GLfloat yoffset = last_y - y_pos;  // Reversed since y-coordinates go from bottom to left
 
-	lastX = xpos;
-	lastY = ypos;
+	last_x = x_pos;
+	last_y = y_pos;
 
 	camera.process_mouse_movement(xoffset, yoffset);
 }
 
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void scroll_callback(GLFWwindow* window, double x_offset, double y_offset)
 {
-	camera.process_mouse_scroll(yoffset, deltaTime);
+	camera.process_mouse_scroll(y_offset, delta_time);
 }
