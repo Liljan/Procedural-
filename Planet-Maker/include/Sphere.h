@@ -27,6 +27,8 @@ public:
 	glm::vec3* getPosition() { return &m_position; }
 	void setPosition(glm::vec3 pos) { m_position = pos; }
 
+	glm::vec3 m_position;
+
 private:
 	GLuint m_vao;          // Vertex array object, the main handle for geometry
 	int m_nverts; // Number of vertices in the vertex array
@@ -37,5 +39,4 @@ private:
 	GLuint* p_indexarray;   // Element index array
 
 	float m_radius;
-	glm::vec3 m_position;
 };

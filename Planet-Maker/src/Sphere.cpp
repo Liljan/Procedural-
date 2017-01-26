@@ -41,7 +41,6 @@ Sphere::~Sphere(void)
 	clean();
 }
 
-
 void Sphere::createSphere(float radius, int segments) {
 	int i, j, base, i0;
 	float x, y, z, R;
