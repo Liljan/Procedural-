@@ -13,6 +13,7 @@
 #include "MatrixStack.h"
 #include "Camera.h"
 #include "Sphere.h"
+#include "Plane.h"
 
 void input_handler(GLFWwindow* _window, double _dT);
 void camera_handler(GLFWwindow* _window, double _dT, Camera* _cam);
@@ -63,6 +64,7 @@ int sky_octaves = 6;
 
 Sphere* sphere;
 Sphere* sky_sphere;
+Plane* stars;
 
 void list_files()
 {
@@ -269,18 +271,18 @@ int main() {
 
 	// __________ STAR BACKGROUND ______________
 
-/*	Shader stars_shader;
+	Shader stars_shader;
 	stars_shader.createShader("shaders/stars_vert.glsl", "shaders/stars_frag.glsl");
 
 	GLint locationP_stars = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
 	GLint locationMV_stars = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
-	*/
-	// _____________________________________________________
+
+																					 // _____________________________________________________
 	MatrixStack MVstack; MVstack.init();
 
 	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 	sky_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
-	//stars = new Plane(0.0f, 0.0f, -3.0f, 100000.0f, 100000.0f);
+	stars = new Plane(0.0f, 0.0f, -3.0f, 100000.0f, 100000.0f);
 
 	Camera mCamera;
 	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
@@ -508,7 +510,7 @@ int main() {
 		if (draw_wireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		glUseProgram(proceduralShader.programID);
+		//glUseProgram(proceduralShader.programID);
 
 		MVstack.push();//Camera transforms --<
 
@@ -516,7 +518,7 @@ int main() {
 		MVstack.multiply(mCamera.getTransformM());
 
 		// _________ PLANET __________
-		MVstack.push();
+/*		MVstack.push();
 		MVstack.translate(sphere->getPosition());
 		MVstack.rotX(rotation_radians[0]);
 		MVstack.rotY(rotation_radians[1]);
@@ -567,18 +569,9 @@ int main() {
 
 			MVstack.pop();
 		}
-
-	/*	// STARS SHADER
-		glUseProgram(stars_shader.programID);
-		glUniformMatrix4fv(locationP_stars, 1, GL_FALSE, mCamera.getPerspective());
-
-		MVstack.push();
-		MVstack.translate(background_pos);
-		glUniformMatrix4fv(locationMV_stars, 1, GL_FALSE, MVstack.getCurrentMatrix());
-
-		stars->render();
 		*/
-		//MVstack.pop();
+
+		MVstack.pop();
 
 		MVstack.pop(); //Camera transforms >--
 

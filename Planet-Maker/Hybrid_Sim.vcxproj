@@ -22,10 +22,12 @@
     <ClCompile Include="external\imgui\imgui.cpp" />
     <ClCompile Include="external\imgui\imgui_draw.cpp" />
     <ClCompile Include="external\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\CustomPlane.cpp" />
     <ClCompile Include="src\glfwContext.cpp" />
-    <ClCompile Include="src\mainOpenGL.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MatrixStack.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -33,12 +35,13 @@
     <ClInclude Include="external\imgui\imgui.h" />
     <ClInclude Include="external\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="external\imgui\imgui_internal.h" />
+    <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\CustomCamera.h" />
     <ClInclude Include="include\CustomPlane.h" />
-    <ClInclude Include="include\CustomShader.h" />
     <ClInclude Include="include\glfwContext.h" />
     <ClInclude Include="include\MatrixStack.h" />
     <ClInclude Include="include\Parameters.h" />
+    <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\Sphere.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
