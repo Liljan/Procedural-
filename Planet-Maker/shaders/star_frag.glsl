@@ -183,10 +183,9 @@ float pnoise(vec3 P, vec3 rep)
 // THIS IS WHERE THE FUN BEGINS
 
 in vec3 pos;
-
 out vec4 color;
 
-float frequency = 100.0f;
+float frequency = 100.0;
 
 void main() {
 

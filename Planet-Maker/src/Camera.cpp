@@ -11,7 +11,7 @@ Camera::Camera()
 	transform = glm::mat4(1.0f);
 	perspective = glm::perspective(45.0f, 16.0f / 9.0f, 0.1f, 100.f);
 
-	direction = glm::vec3(0.0f, 0.0f, -1.0f);
+	direction = glm::vec3(0.0f, 0.0f, 1.0f);
 	upDirection = glm::vec3(0.0f, 1.0f, 0.0f);
 	rightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
 

@@ -13,6 +13,7 @@
 #include "MatrixStack.h"
 #include "Camera.h"
 #include "Sphere.h"
+#include "CustomPlane.h"
 
 void input_handler(GLFWwindow* _window, double _dT);
 void camera_handler(GLFWwindow* _window, double _dT, Camera* _cam);
@@ -61,8 +62,11 @@ float sky_frequency = 4.0f;
 int sky_seed = 0;
 int sky_octaves = 6;
 
-Sphere* sphere;
+Sphere* terrain_sphere;
 Sphere* sky_sphere;
+
+std::vector<CustomPlane*> skybox;
+float scale = 100.0f;
 
 void list_files()
 {
@@ -132,8 +136,8 @@ void load_file(std::string file_name)
 		infile >> use_cell;
 
 		infile.close();
-		delete sphere;
-		sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+		delete terrain_sphere;
+		terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 	}
 	catch (const std::exception&)
 	{
@@ -217,75 +221,81 @@ int main() {
 	bool is_paused = false;
 	bool fpsResetBool = false;
 
-	double lastTime = glfwGetTime() - 0.001;
-	double dT = 0.0;
+	double last_time = glfwGetTime();
+	double delta_time = 0.0;
 
 	// other shite
 	float rotation_degrees[2] = { 0.0f,0.0f };
 	float rotation_radians[2] = { 0.0f,0.0f };
 
 	// __________ TERRAIN ______________
+	Shader terrain_shader;
+	terrain_shader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
 
-	Shader proceduralShader;
-	proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
+	GLint loc_P_terrain = glGetUniformLocation(terrain_shader.programID, "P"); // perspective matrix
+	GLint loc_V_terrain = glGetUniformLocation(terrain_shader.programID, "V"); // modelview matrix
+	GLint loc_M_terrain = glGetUniformLocation(terrain_shader.programID, "M"); // modelview matrix
 
-	GLint locationP = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
-	GLint locationMV = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
+	GLint loc_light_position = glGetUniformLocation(terrain_shader.programID, "light_pos");
+	GLint loc_light_intensity = glGetUniformLocation(terrain_shader.programID, "light_intensity");
+	GLint loc_shininess = glGetUniformLocation(terrain_shader.programID, "shininess");
 
-	GLint gl_light_position = glGetUniformLocation(proceduralShader.programID, "light_pos");
-	GLint gl_light_intensity = glGetUniformLocation(proceduralShader.programID, "light_intensity");
-	GLint gl_shininess = glGetUniformLocation(proceduralShader.programID, "shininess");
+	GLint loc_color_water_1 = glGetUniformLocation(terrain_shader.programID, "color_water_1"); // water color of the planet
+	GLint loc_color_water_2 = glGetUniformLocation(terrain_shader.programID, "color_water_2"); // water color of the planet
+	GLint loc_color_ground_1 = glGetUniformLocation(terrain_shader.programID, "color_ground_1"); // ground color of the planet
+	GLint loc_color_ground_2 = glGetUniformLocation(terrain_shader.programID, "color_ground_2"); // ground color of the planet
+	GLint loc_color_mountain_1 = glGetUniformLocation(terrain_shader.programID, "color_mountain_1"); // mountain color of the planet
+	GLint loc_color_mountain_2 = glGetUniformLocation(terrain_shader.programID, "color_mountain_2"); // mountain color of the planet
 
-	GLint gl_color_water_1 = glGetUniformLocation(proceduralShader.programID, "color_water_1"); // water color of the planet
-	GLint gl_color_water_2 = glGetUniformLocation(proceduralShader.programID, "color_water_2"); // water color of the planet
-	GLint gl_color_ground_1 = glGetUniformLocation(proceduralShader.programID, "color_ground_1"); // ground color of the planet
-	GLint gl_color_ground_2 = glGetUniformLocation(proceduralShader.programID, "color_ground_2"); // ground color of the planet
-	GLint gl_color_mountain_1 = glGetUniformLocation(proceduralShader.programID, "color_mountain_1"); // mountain color of the planet
-	GLint gl_color_mountain_2 = glGetUniformLocation(proceduralShader.programID, "color_mountain_2"); // mountain color of the planet
-
-	GLfloat gl_radius = glGetUniformLocation(proceduralShader.programID, "radius");
-	GLfloat gl_elevation = glGetUniformLocation(proceduralShader.programID, "elevationModifier");
-	GLint gl_seed = glGetUniformLocation(proceduralShader.programID, "seed");
-	GLint gl_octaves = glGetUniformLocation(proceduralShader.programID, "octaves");
-	GLfloat gl_vert_frequency = glGetUniformLocation(proceduralShader.programID, "vert_frequency");
-	GLfloat gl_frag_frequency = glGetUniformLocation(proceduralShader.programID, "frag_frequency");
+	GLfloat loc_radius = glGetUniformLocation(terrain_shader.programID, "radius");
+	GLfloat loc_elevation = glGetUniformLocation(terrain_shader.programID, "elevationModifier");
+	GLint loc_seed = glGetUniformLocation(terrain_shader.programID, "seed");
+	GLint loc_octaves = glGetUniformLocation(terrain_shader.programID, "octaves");
+	GLfloat loc_vert_frequency = glGetUniformLocation(terrain_shader.programID, "vert_frequency");
+	GLfloat loc_frag_frequency = glGetUniformLocation(terrain_shader.programID, "frag_frequency");
 
 	// __________ SKY ______________
 
 	Shader sky_shader;
 	sky_shader.createShader("shaders/sky_vert.glsl", "shaders/sky_frag.glsl");
 
-	GLint locationP_sky = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
-	GLint locationMV_sky = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
+	GLint loc_P_sky = glGetUniformLocation(sky_shader.programID, "P"); // perspective matrix
+	GLint loc_V_sky = glGetUniformLocation(sky_shader.programID, "V"); // view matrix
+	GLint loc_M_sky = glGetUniformLocation(sky_shader.programID, "M"); // model matrix
 
-	GLint gl_sky_radius = glGetUniformLocation(sky_shader.programID, "radius");
-	GLfloat gl_sky_elevation = glGetUniformLocation(sky_shader.programID, "elevationModifier");
+	GLint loc_sky_radius = glGetUniformLocation(sky_shader.programID, "radius");
+	GLfloat loc_sky_elevation = glGetUniformLocation(sky_shader.programID, "elevationModifier");
 
-	GLint gl_sky_time = glGetUniformLocation(sky_shader.programID, "time");
-	GLint gl_sky_speed = glGetUniformLocation(sky_shader.programID, "speed");
-	GLint gl_sky_frequency = glGetUniformLocation(sky_shader.programID, "frequency");
-	GLint gl_sky_octaves = glGetUniformLocation(sky_shader.programID, "octaves");
-	GLint gl_sky_seed = glGetUniformLocation(sky_shader.programID, "seed");
+	GLint loc_sky_time = glGetUniformLocation(sky_shader.programID, "time");
+	GLint loc_sky_speed = glGetUniformLocation(sky_shader.programID, "speed");
+	GLint loc_sky_frequency = glGetUniformLocation(sky_shader.programID, "frequency");
+	GLint loc_sky_octaves = glGetUniformLocation(sky_shader.programID, "octaves");
+	GLint loc_sky_seed = glGetUniformLocation(sky_shader.programID, "seed");
 
 	// __________ STAR BACKGROUND ______________
 
-/*	Shader stars_shader;
-	stars_shader.createShader("shaders/stars_vert.glsl", "shaders/stars_frag.glsl");
+	Shader stars_shader;
+	stars_shader.createShader("shaders/star_vert.glsl", "shaders/star_frag.glsl");
 
-	GLint locationP_stars = glGetUniformLocation(proceduralShader.programID, "P"); // perspective matrix
-	GLint locationMV_stars = glGetUniformLocation(proceduralShader.programID, "MV"); // modelview matrix
-	*/
+	skybox.push_back(new CustomPlane(scale, glm::vec3(0, 0, scale / 2.f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f))); // back
+	skybox.push_back(new CustomPlane(scale, glm::vec3(0, 0, -scale / 2.f), M_PI, glm::vec3(1.0f, 0.0f, 0.0f))); // front
+	skybox.push_back(new CustomPlane(scale, glm::vec3(0, scale / 2.f, 0.0f), -M_PI / 2.f, glm::vec3(1.0f, 0.0f, 0.0f))); // top
+	skybox.push_back(new CustomPlane(scale, glm::vec3(0, -scale / 2.f, 0.0f), M_PI / 2.f, glm::vec3(1.0f, 0.0f, 0.0f))); // bottom
+	skybox.push_back(new CustomPlane(scale, glm::vec3(scale / 2.f, 0.0f, 0.0f), M_PI / 2.f, glm::vec3(0.0f, 1.0f, 0.0f))); // right
+	skybox.push_back(new CustomPlane(scale, glm::vec3(-scale / 2.f, 0.0f, 0.0f), -M_PI / 2.f, glm::vec3(0.0f, 1.0f, 0.0f))); // left
+
+	GLint loc_P_stars = glGetUniformLocation(stars_shader.programID, "P"); // perspective matrix
+	GLint loc_V_stars = glGetUniformLocation(stars_shader.programID, "V"); // view matrix
+	GLint loc_M_stars = glGetUniformLocation(stars_shader.programID, "M"); // model matrix
+
 	// _____________________________________________________
-	MatrixStack MVstack; MVstack.init();
 
-	sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+	terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 	sky_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
-	//stars = new Plane(0.0f, 0.0f, -3.0f, 100000.0f, 100000.0f);
 
-	Camera mCamera;
-	mCamera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
-	//mCamera.setDirection(&glm::vec3(0.f, 0.f, -1.f));
-	mCamera.update();
+	Camera camera;
+	camera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
+	camera.update();
 
 	// RENDER LOOP \__________________________________________/
 
@@ -329,8 +339,8 @@ int main() {
 			ImGui::Text("Geometry");
 
 			if (ImGui::SliderInt("Segments", &segments, 1, 200)) {
-				delete sphere;
-				sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+				delete terrain_sphere;
+				terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
 			}
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("The numbers of segment the mesh has.");
@@ -447,7 +457,9 @@ int main() {
 			ImGui::Checkbox("Draw wireframe", &draw_wireframe);
 
 			if (ImGui::Button("Reload shaders")) {
-				proceduralShader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
+				terrain_shader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
+				sky_shader.createShader("shaders/sky_vert.glsl", "shaders/sky_frag.glsl");
+				stars_shader.createShader("shaders/star_vert.glsl", "shaders/star_frag.glsl");
 			}
 
 			if (ImGui::BeginMenu("Load/Save")) {
@@ -476,17 +488,11 @@ int main() {
 			}
 		}
 
-		if (dT > 1.0 / 30.0)
-		{
-			lastTime = glfwGetTime();
-		}
-		else if (!is_paused)
-		{
-			dT = glfwGetTime() - lastTime;
-		}
+		delta_time = glfwGetTime() - last_time;
+		last_time = glfwGetTime();
 
 		//glfw input handler
-		input_handler(currentWindow, dT);
+		input_handler(currentWindow, delta_time);
 
 		if (glfwGetKey(currentWindow, GLFW_KEY_LEFT_CONTROL))
 		{
@@ -496,91 +502,91 @@ int main() {
 				glfwSetCursorPos(currentWindow, 1920 / 2, 1080 / 2);
 			}
 
-			mCamera.fpsCamera(currentWindow, dT);
+			camera.fpsCamera(currentWindow, delta_time);
 		}
 		else
 		{
 			fpsResetBool = false;
 		}
 
+		// __________ RENDERING SETTINGS _______
+
 		GL_calls();
 
 		if (draw_wireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		glUseProgram(proceduralShader.programID);
-
-		MVstack.push();//Camera transforms --<
-
-		glUniformMatrix4fv(locationP, 1, GL_FALSE, mCamera.getPerspective());
-		MVstack.multiply(mCamera.getTransformM());
-
 		// _________ PLANET __________
-		MVstack.push();
-		MVstack.translate(sphere->getPosition());
-		MVstack.rotX(rotation_radians[0]);
-		MVstack.rotY(rotation_radians[1]);
-		glUniformMatrix4fv(locationMV, 1, GL_FALSE, MVstack.getCurrentMatrix());
+		glUseProgram(terrain_shader.programID);
 
-		glUniform3fv(gl_light_position, 1, &light_position[0]);
-		glUniform1f(gl_light_intensity, light_intensity);
-		glUniform1f(gl_shininess, shininess);
+		glUniformMatrix4fv(loc_P_terrain, 1, GL_FALSE, camera.getPerspective());
+		glUniformMatrix4fv(loc_V_terrain, 1, GL_FALSE, camera.getTransformF());
 
-		glUniform1f(gl_radius, radius);
-		glUniform1f(gl_elevation, elevation);
-		glUniform1i(gl_seed, seed);
-		glUniform1i(gl_octaves, octaves);
-		glUniform1f(gl_vert_frequency, vert_frequency);
-		glUniform1f(gl_frag_frequency, frag_frequency);
+		glm::mat4 model;
+		model = glm::translate(model, *sky_sphere->getPosition());
+		glUniformMatrix4fv(loc_M_terrain, 1, GL_FALSE, glm::value_ptr(model));
 
-		glUniform3fv(gl_color_water_1, 1, &color_water_1[0]);
-		glUniform3fv(gl_color_water_2, 1, &color_water_2[0]);
-		glUniform3fv(gl_color_ground_1, 1, &color_ground_1[0]);
-		glUniform3fv(gl_color_ground_2, 1, &color_ground_2[0]);
-		glUniform3fv(gl_color_mountain_1, 1, &color_mountain_1[0]);
-		glUniform3fv(gl_color_mountain_2, 1, &color_mountain_2[0]);
+		model = glm::rotate(model, rotation_radians[0], glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, rotation_radians[1], glm::vec3(1.0f, 0.0f, 0.0f));
 
-		sphere->render();
+		glUniform3fv(loc_light_position, 1, &light_position[0]);
+		glUniform1f(loc_light_intensity, light_intensity);
+		glUniform1f(loc_shininess, shininess);
 
-		MVstack.pop();
+		glUniform1f(loc_radius, radius);
+		glUniform1f(loc_elevation, elevation);
+		glUniform1i(loc_seed, seed);
+		glUniform1i(loc_octaves, octaves);
+		glUniform1f(loc_vert_frequency, vert_frequency);
+		glUniform1f(loc_frag_frequency, frag_frequency);
+
+		glUniform3fv(loc_color_water_1, 1, &color_water_1[0]);
+		glUniform3fv(loc_color_water_2, 1, &color_water_2[0]);
+		glUniform3fv(loc_color_ground_1, 1, &color_ground_1[0]);
+		glUniform3fv(loc_color_ground_2, 1, &color_ground_2[0]);
+		glUniform3fv(loc_color_mountain_1, 1, &color_mountain_1[0]);
+		glUniform3fv(loc_color_mountain_2, 1, &color_mountain_2[0]);
+
+		terrain_sphere->render();
 
 		// SKY SHADER
 		if (enable_sky) {
 			glUseProgram(sky_shader.programID);
-			glUniformMatrix4fv(locationP_sky, 1, GL_FALSE, mCamera.getPerspective());
 
-			MVstack.push();
-			MVstack.translate(sky_sphere->getPosition());
-			glUniformMatrix4fv(locationMV_sky, 1, GL_FALSE, MVstack.getCurrentMatrix());
+			glUniformMatrix4fv(loc_P_sky, 1, GL_FALSE, camera.getPerspective());
+			glUniformMatrix4fv(loc_V_sky, 1, GL_FALSE, camera.getTransformF());
+
+			glm::mat4 model;
+			model = glm::translate(model, *sky_sphere->getPosition());
+			glUniformMatrix4fv(loc_M_sky, 1, GL_FALSE, glm::value_ptr(model));
 
 			// update time
 			time = (float)glfwGetTime();
-			glUniform1f(gl_sky_time, time);
-			glUniform1f(gl_sky_speed, sky_speed);
-			glUniform1f(gl_sky_radius, radius);
-			glUniform1f(gl_sky_elevation, elevation);
-			glUniform1i(gl_sky_seed, sky_seed);
-			glUniform1f(gl_sky_frequency, sky_frequency);
-			glUniform1i(gl_sky_octaves, sky_octaves);
+			glUniform1f(loc_sky_time, time);
+			glUniform1f(loc_sky_speed, sky_speed);
+			glUniform1f(loc_sky_radius, radius);
+			glUniform1f(loc_sky_elevation, elevation);
+			glUniform1i(loc_sky_seed, sky_seed);
+			glUniform1f(loc_sky_frequency, sky_frequency);
+			glUniform1i(loc_sky_octaves, sky_octaves);
 
 			sky_sphere->render();
-
-			MVstack.pop();
 		}
 
-	/*	// STARS SHADER
+		// STARS SHADER
 		glUseProgram(stars_shader.programID);
-		glUniformMatrix4fv(locationP_stars, 1, GL_FALSE, mCamera.getPerspective());
+		glUniformMatrix4fv(loc_P_stars, 1, GL_FALSE, camera.getPerspective());
+		glUniformMatrix4fv(loc_V_stars, 1, GL_FALSE, camera.getTransformF());
+		//glUniformMatrix4fv(loc_P_stars, 1, GL_FALSE, mCamera.getPerspective());
 
-		MVstack.push();
-		MVstack.translate(background_pos);
-		glUniformMatrix4fv(locationMV_stars, 1, GL_FALSE, MVstack.getCurrentMatrix());
+		for (int i = 0; i < skybox.size(); ++i) {
+			glm::mat4 model;
+			model = glm::translate(model, skybox[i]->m_position);
+			model = glm::rotate(model, skybox[i]->m_angle, skybox[i]->m_rotation);
 
-		stars->render();
-		*/
-		//MVstack.pop();
-
-		MVstack.pop(); //Camera transforms >--
+			glUniformMatrix4fv(loc_M_stars, 1, GL_FALSE, glm::value_ptr(model));
+			skybox[i]->render();
+		}
 
 		glUseProgram(0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -593,11 +599,10 @@ int main() {
 
 		glfwSwapBuffers(currentWindow);
 
-		//std::cout << mCamera.getTransformM() << std::endl;
 	}
 
 	ImGui_ImplGlfw_Shutdown();
-	delete sphere;
+	delete terrain_sphere;
 
 	return 0;
 }

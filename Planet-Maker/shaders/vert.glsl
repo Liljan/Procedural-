@@ -183,7 +183,8 @@ float pnoise(vec3 P, vec3 rep)
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec3 Normal;
 
-uniform mat4 MV;
+uniform mat4 M;
+uniform mat4 V;
 uniform mat4 P;
 
 uniform int seed;
@@ -216,10 +217,10 @@ void main(){
   pos += elevation * Normal * elevationModifier;
 
   //vec3 pos = Position + 0.01*Normal*sin(10.0*time+10.0*Position.y);
-  gl_Position = (P * MV) * vec4(pos, 1.0);
-  camPos = mat3(MV) * Position;
+  gl_Position = (P * V * M) * vec4(pos, 1.0);
+  camPos = mat3(V * M) * Position;
 
-  interpolatedNormal = mat3(MV) * Normal; 
+  interpolatedNormal = mat3(V * M) * Normal; 
   
   height = elevation;
 }
