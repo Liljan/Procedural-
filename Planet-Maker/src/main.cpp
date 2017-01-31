@@ -32,6 +32,10 @@ static const std::string FILE_ENDING = ".ass";
 
 static glm::vec3* background_pos = new glm::vec3(0.0f, 0.0f, 3.0f);
 
+// ________ Ocean _________
+
+// 2 DO
+
 // ________ TERRAIN _________
 // Procedural related variables
 int segments = 32;
@@ -61,7 +65,9 @@ bool enable_sky = true;
 float sky_frequency = 4.0f;
 int sky_seed = 0;
 int sky_octaves = 6;
+float sky_color[3] = { 1.0f,1.0f,1.0f };
 
+Sphere* ocean_sphere;
 Sphere* terrain_sphere;
 Sphere* sky_sphere;
 
@@ -228,6 +234,15 @@ int main() {
 	float rotation_degrees[2] = { 0.0f,0.0f };
 	float rotation_radians[2] = { 0.0f,0.0f };
 
+	// __________ WATER ______________
+
+	Shader water_shader;
+	water_shader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
+
+	GLint loc_P_water = glGetUniformLocation(water_shader.programID, "P"); // perspective matrix
+	GLint loc_V_water = glGetUniformLocation(water_shader.programID, "V"); // modelview matrix
+	GLint loc_M_water = glGetUniformLocation(water_shader.programID, "M"); // modelview matrix
+
 	// __________ TERRAIN ______________
 	Shader terrain_shader;
 	terrain_shader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
@@ -271,6 +286,7 @@ int main() {
 	GLint loc_sky_frequency = glGetUniformLocation(sky_shader.programID, "frequency");
 	GLint loc_sky_octaves = glGetUniformLocation(sky_shader.programID, "octaves");
 	GLint loc_sky_seed = glGetUniformLocation(sky_shader.programID, "seed");
+	GLint loc_sky_color = glGetUniformLocation(sky_shader.programID, "sky_color");
 
 	// __________ STAR BACKGROUND ______________
 
@@ -305,34 +321,6 @@ int main() {
 
 		ImGui_ImplGlfw_NewFrame();
 		{
-			if (ImGui::BeginMainMenuBar()) {
-				if (ImGui::BeginMenu("File")) {
-					if (ImGui::MenuItem("Open")) {
-						std::cout << "open ";
-
-						if (ImGui::Begin("Input")) {
-							ImGui::End();
-						}
-					}
-
-					if (ImGui::MenuItem("Save")) {
-						std::cout << "save ";
-					}
-
-					ImGui::EndMenu();
-				}
-
-				if (ImGui::BeginMenu("Help")) {
-					if (ImGui::MenuItem("No help for you!")) {
-						std::cout << "help ";
-					}
-
-					ImGui::EndMenu();
-				}
-
-				ImGui::EndMainMenuBar();
-			}
-
 			ImGui::Text("Procedural Planet Maker");
 			ImGui::Separator();
 
@@ -392,6 +380,7 @@ int main() {
 
 				ImGui::Text("Clouds");
 				ImGui::Checkbox("Enable clouds", &enable_sky);
+				ImGui::ColorEdit3("Color", sky_color);
 				ImGui::SliderInt("Octaves", &sky_octaves, 1, 10);
 				ImGui::SliderFloat("Frequency", &sky_frequency, 0.01f, 10.0f);
 				ImGui::SliderInt("Seed", &sky_seed, 0, 10000);
@@ -523,11 +512,10 @@ int main() {
 		glUniformMatrix4fv(loc_V_terrain, 1, GL_FALSE, camera.getTransformF());
 
 		glm::mat4 model;
-		model = glm::translate(model, *sky_sphere->getPosition());
-		glUniformMatrix4fv(loc_M_terrain, 1, GL_FALSE, glm::value_ptr(model));
-
 		model = glm::rotate(model, rotation_radians[0], glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, rotation_radians[1], glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, *sky_sphere->getPosition());
+		glUniformMatrix4fv(loc_M_terrain, 1, GL_FALSE, glm::value_ptr(model));
 
 		glUniform3fv(loc_light_position, 1, &light_position[0]);
 		glUniform1f(loc_light_intensity, light_intensity);
@@ -557,6 +545,8 @@ int main() {
 			glUniformMatrix4fv(loc_V_sky, 1, GL_FALSE, camera.getTransformF());
 
 			glm::mat4 model;
+			model = glm::rotate(model, rotation_radians[0], glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, rotation_radians[1], glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::translate(model, *sky_sphere->getPosition());
 			glUniformMatrix4fv(loc_M_sky, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -569,6 +559,7 @@ int main() {
 			glUniform1i(loc_sky_seed, sky_seed);
 			glUniform1f(loc_sky_frequency, sky_frequency);
 			glUniform1i(loc_sky_octaves, sky_octaves);
+			glUniform3fv(loc_sky_color,1, &sky_color[0]);
 
 			sky_sphere->render();
 		}

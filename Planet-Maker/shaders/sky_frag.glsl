@@ -189,11 +189,13 @@ uniform int seed;
 uniform int octaves;
 uniform float frequency;
 
+uniform vec3 sky_color;
+
 out vec4 color;
 
 void main() {
 
-  vec3 diffusecolor = vec3(1.0,1.0,1.0);
+  vec3 diffuse_color = sky_color;
 
   float opacity;
 
@@ -207,5 +209,8 @@ void main() {
 
   opacity = noise;
 
-  color = vec4(diffusecolor,opacity);
+ /* if(opacity < 0.1)
+    color = vec4(0.0,0.0,1.0,0.05);
+  else*/
+    color = vec4(diffuse_color,opacity);
 }
