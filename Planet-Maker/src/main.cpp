@@ -47,12 +47,12 @@ float frag_frequency = 4.0f;
 int octaves = 6;
 int seed = 0;
 
-float color_water_1[3] = { 1.0f,1.0f,1.0f };
-float color_water_2[3] = { 1.0f,1.0f,1.0f };
-float color_ground_1[3] = { 1.0f,1.0f,1.0f };
-float color_ground_2[3] = { 1.0f,1.0f,1.0f };
-float color_mountain_1[3] = { 1.0f,1.0f,1.0f };
-float color_mountain_2[3] = { 0.05f,0.01f,0.03f };
+float color_water_1[3] = { 0.0f,0.352941f,1.0f };
+float color_water_2[3] = { 0.0f,0.231142f,0.654902f };
+float color_ground_1[3] = { 0.0821223f,0.698039f,0.140091f };
+float color_ground_2[3] = { 0.0535179f,0.454902f,0.0912952f };
+float color_mountain_1[3] = { 0.286275f,0.286275f,0.286275f };
+float color_mountain_2[3] = { 0.980392f,0.980392f,0.980392f };
 
 bool use_perlin = true;
 bool use_simplex = false;
