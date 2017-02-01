@@ -194,7 +194,6 @@ uniform int octaves;
 uniform float vert_frequency;
 
 out vec3 interpolatedNormal;
-out vec2 st;
 out float height;
 
 out vec3 camPos;

@@ -213,5 +213,6 @@ void main() {
  /* if(opacity < 0.1)
     color = vec4(0.0,0.0,1.0,0.05);
   else*/
-    color = vec4(diffuse_color,opacity);
+  //vec4 blue = vec4(0.0,0.0,0.5,0.3);
+  color = vec4(diffuse_color,opacity);
 }

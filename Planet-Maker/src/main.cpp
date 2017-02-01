@@ -34,8 +34,6 @@ static glm::vec3* background_pos = new glm::vec3(0.0f, 0.0f, 3.0f);
 
 // ________ Ocean _________
 
-// 2 DO
-
 bool ocean_enabled = true;
 float ocean_frequency = 4.0f;
 int ocean_seed = 0;
@@ -54,12 +52,11 @@ float frag_frequency = 4.0f;
 int octaves = 6;
 int seed = 0;
 
-float color_water_1[3] = { 0.1f,0.1f,0.1f };
-float color_water_2[3] = { 0.3f,0.3f,0.3f };
-float color_ground_1[3] = { 0.0821223f,0.698039f,0.140091f };
-float color_ground_2[3] = { 0.0535179f,0.454902f,0.0912952f };
-float color_mountain_1[3] = { 0.286275f,0.286275f,0.286275f };
-float color_mountain_2[3] = { 0.980392f,0.980392f,0.980392f };
+float color_deep[3] = { 0.3f,0.3f,0.3f };
+float color_beach[3] = { 1.0f,0.96f,0.57f };
+float color_grass[3] = { 0.0535179f,0.454902f,0.0912952f };
+float color_rock[3] = { 0.286275f,0.286275f,0.286275f };
+float color_snow[3] = { 0.980392f,0.980392f,0.980392f };
 
 bool use_perlin = true;
 bool use_simplex = false;
@@ -137,12 +134,11 @@ void load_file(std::string file_name)
 		infile >> seed;
 
 		// colors
-		file_to_color(infile, color_water_1);
-		file_to_color(infile, color_water_2);
-		file_to_color(infile, color_ground_1);
-		file_to_color(infile, color_ground_2);
-		file_to_color(infile, color_mountain_1);
-		file_to_color(infile, color_mountain_2);
+		file_to_color(infile, color_deep);
+		file_to_color(infile, color_beach);
+		file_to_color(infile, color_grass);
+		file_to_color(infile, color_rock);
+		file_to_color(infile, color_snow);
 
 		infile >> use_perlin;
 		infile >> use_simplex;
@@ -173,12 +169,11 @@ void save_file(std::string file_name) {
 		outfile << seed << std::endl;
 
 		// colors
-		color_to_file(outfile, color_water_1);
-		color_to_file(outfile, color_water_2);
-		color_to_file(outfile, color_ground_1);
-		color_to_file(outfile, color_ground_2);
-		color_to_file(outfile, color_mountain_1);
-		color_to_file(outfile, color_mountain_2);
+		color_to_file(outfile, color_deep);
+		color_to_file(outfile, color_beach);
+		color_to_file(outfile, color_grass);
+		color_to_file(outfile, color_rock);
+		color_to_file(outfile, color_snow);
 
 		outfile << use_perlin << std::endl;
 		outfile << use_simplex << std::endl;
@@ -253,12 +248,11 @@ int main() {
 	GLint loc_light_intensity = glGetUniformLocation(terrain_shader.programID, "light_intensity");
 	GLint loc_shininess = glGetUniformLocation(terrain_shader.programID, "shininess");
 
-	GLint loc_color_water_1 = glGetUniformLocation(terrain_shader.programID, "color_water_1"); // water color of the planet
-	GLint loc_color_water_2 = glGetUniformLocation(terrain_shader.programID, "color_water_2"); // water color of the planet
-	GLint loc_color_ground_1 = glGetUniformLocation(terrain_shader.programID, "color_ground_1"); // ground color of the planet
-	GLint loc_color_ground_2 = glGetUniformLocation(terrain_shader.programID, "color_ground_2"); // ground color of the planet
-	GLint loc_color_mountain_1 = glGetUniformLocation(terrain_shader.programID, "color_mountain_1"); // mountain color of the planet
-	GLint loc_color_mountain_2 = glGetUniformLocation(terrain_shader.programID, "color_mountain_2"); // mountain color of the planet
+	GLint loc_color_deep = glGetUniformLocation(terrain_shader.programID, "color_deep"); // water color of the planet
+	GLint loc_color_beach = glGetUniformLocation(terrain_shader.programID, "color_beach"); // ground color of the planet
+	GLint loc_color_grass = glGetUniformLocation(terrain_shader.programID, "color_grass"); // ground color of the planet
+	GLint loc_color_rock = glGetUniformLocation(terrain_shader.programID, "color_rock"); // mountain color of the planet
+	GLint loc_color_snow = glGetUniformLocation(terrain_shader.programID, "color_snow"); // mountain color of the planet
 
 	GLfloat loc_radius = glGetUniformLocation(terrain_shader.programID, "radius");
 	GLfloat loc_elevation = glGetUniformLocation(terrain_shader.programID, "elevationModifier");
@@ -381,12 +375,11 @@ int main() {
 					ImGui::SetTooltip("Frequency of the noise.");
 
 				ImGui::Spacing();
-				ImGui::ColorEdit3("Low color 1", color_water_1);
-				ImGui::ColorEdit3("Low color 2", color_water_2);
-				ImGui::ColorEdit3("Medium color 1", color_ground_1);
-				ImGui::ColorEdit3("Medium color 2", color_ground_2);
-				ImGui::ColorEdit3("High color 1", color_mountain_1);
-				ImGui::ColorEdit3("High color 2", color_mountain_2);
+				ImGui::ColorEdit3("Low color 2", color_deep);
+				ImGui::ColorEdit3("Medium color 1", color_beach);
+				ImGui::ColorEdit3("Medium color 2", color_grass);
+				ImGui::ColorEdit3("High color 1", color_rock);
+				ImGui::ColorEdit3("High color 2", color_snow);
 
 				ImGui::EndMenu();
 			}
@@ -462,12 +455,11 @@ int main() {
 				octaves = 6;
 				seed = 0;
 
-				color_water_1[0] = color_water_1[1] = color_water_1[2] = 1.0f;
-				color_water_2[0] = color_water_2[1] = color_water_2[2] = 1.0f;
-				color_ground_1[0] = color_ground_1[1] = color_ground_1[2] = 1.0f;
-				color_ground_2[0] = color_ground_2[1] = color_ground_2[2] = 1.0f;
-				color_mountain_1[0] = color_mountain_1[1] = color_mountain_1[2] = 1.0f;
-				color_mountain_2[0] = color_mountain_2[1] = color_mountain_2[2] = 1.0f;
+				color_deep[0] = color_deep[1] = color_deep[2] = 1.0f;
+				color_beach[0] = color_beach[1] = color_beach[2] = 1.0f;
+				color_grass[0] = color_grass[1] = color_grass[2] = 1.0f;
+				color_rock[0] = color_rock[1] = color_rock[2] = 1.0f;
+				color_snow[0] = color_snow[1] = color_snow[2] = 1.0f;
 
 				use_perlin = true;
 				rotation_degrees[0] = rotation_degrees[1] = 0.0f;
@@ -573,16 +565,13 @@ int main() {
 		glUniform1f(loc_vert_frequency, vert_frequency);
 		glUniform1f(loc_frag_frequency, frag_frequency);
 
-		glUniform3fv(loc_color_water_1, 1, &color_water_1[0]);
-		glUniform3fv(loc_color_water_2, 1, &color_water_2[0]);
-		glUniform3fv(loc_color_ground_1, 1, &color_ground_1[0]);
-		glUniform3fv(loc_color_ground_2, 1, &color_ground_2[0]);
-		glUniform3fv(loc_color_mountain_1, 1, &color_mountain_1[0]);
-		glUniform3fv(loc_color_mountain_2, 1, &color_mountain_2[0]);
+		glUniform3fv(loc_color_deep, 1, &color_deep[0]);
+		glUniform3fv(loc_color_beach, 1, &color_beach[0]);
+		glUniform3fv(loc_color_grass, 1, &color_grass[0]);
+		glUniform3fv(loc_color_rock, 1, &color_rock[0]);
+		glUniform3fv(loc_color_snow, 1, &color_snow[0]);
 
 		terrain_sphere->render();
-
-
 
 		// OCEAN SHADER
 		if (ocean_enabled) {
@@ -634,8 +623,6 @@ int main() {
 
 			sky_sphere->render();
 		}
-
-		
 
 		glUseProgram(0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

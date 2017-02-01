@@ -15,7 +15,7 @@ out vec3 interpolatedNormal;
 out vec3 pos;
 
 void main(){
-  float height = elevationModifier;
+  float height = 1.1* elevationModifier;
 
   pos = Position + radius * Normal;
   pos += height * Normal;
