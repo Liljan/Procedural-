@@ -207,8 +207,8 @@ void main() {
     noise += 1.0 / (pow(2, o)) * cnoise((o + 1.0) * frequency * vec3(pos + seed + 0.1 * speed * time));
   }
 
-  //opacity = noise;
-  opacity = 0.3;
+  opacity = noise;
+  //opacity = 0.3;
 
  /* if(opacity < 0.1)
     color = vec4(0.0,0.0,1.0,0.05);

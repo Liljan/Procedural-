@@ -322,9 +322,9 @@ int main() {
 
 	// _____________________________________________________
 
-	terrain_sphere = new Sphere(.0f, 0.0f, 0.0f, 1.0f, segments);
-	sky_sphere = new Sphere(1.0f, 0.0f, 0.0f, 1.0f, 32);
-	ocean_sphere = new Sphere(-1.0f, 0.0f, 0.0f, 1.0f, 32);
+	terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+	sky_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
+	ocean_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
 
 	Camera camera;
 	camera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
@@ -535,6 +535,21 @@ int main() {
 		if (draw_wireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		// STARS SHADER
+		glUseProgram(stars_shader.programID);
+		glUniformMatrix4fv(loc_P_stars, 1, GL_FALSE, camera.getPerspective());
+		glUniformMatrix4fv(loc_V_stars, 1, GL_FALSE, camera.getTransformF());
+		//glUniformMatrix4fv(loc_P_stars, 1, GL_FALSE, mCamera.getPerspective());
+
+		for (int i = 0; i < skybox.size(); ++i) {
+			glm::mat4 model;
+			model = glm::translate(model, skybox[i]->m_position);
+			model = glm::rotate(model, skybox[i]->m_angle, skybox[i]->m_rotation);
+
+			glUniformMatrix4fv(loc_M_stars, 1, GL_FALSE, glm::value_ptr(model));
+			skybox[i]->render();
+		}
+
 		// _________ PLANET __________
 		glUseProgram(terrain_shader.programID);
 
@@ -567,32 +582,7 @@ int main() {
 
 		terrain_sphere->render();
 
-		// SKY SHADER
-		if (sky_enabled) {
-			glUseProgram(sky_shader.programID);
 
-			glUniformMatrix4fv(loc_P_sky, 1, GL_FALSE, camera.getPerspective());
-			glUniformMatrix4fv(loc_V_sky, 1, GL_FALSE, camera.getTransformF());
-
-			glm::mat4 model;
-			model = glm::rotate(model, rotation_radians[0], glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, rotation_radians[1], glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::translate(model, *sky_sphere->getPosition());
-			glUniformMatrix4fv(loc_M_sky, 1, GL_FALSE, glm::value_ptr(model));
-
-			// update time
-			time = (float)glfwGetTime();
-			glUniform1f(loc_sky_time, time);
-			glUniform1f(loc_sky_speed, sky_speed);
-			glUniform1f(loc_sky_radius, radius);
-			glUniform1f(loc_sky_elevation, elevation);
-			glUniform1i(loc_sky_seed, sky_seed);
-			glUniform1f(loc_sky_frequency, sky_frequency);
-			glUniform1i(loc_sky_octaves, sky_octaves);
-			glUniform3fv(loc_sky_color,1, &sky_color[0]);
-
-			sky_sphere->render();
-		}
 
 		// OCEAN SHADER
 		if (ocean_enabled) {
@@ -618,20 +608,34 @@ int main() {
 			ocean_sphere->render();
 		}
 
-		// STARS SHADER
-		glUseProgram(stars_shader.programID);
-		glUniformMatrix4fv(loc_P_stars, 1, GL_FALSE, camera.getPerspective());
-		glUniformMatrix4fv(loc_V_stars, 1, GL_FALSE, camera.getTransformF());
-		//glUniformMatrix4fv(loc_P_stars, 1, GL_FALSE, mCamera.getPerspective());
+		// SKY SHADER
+		if (sky_enabled) {
+			glUseProgram(sky_shader.programID);
 
-		for (int i = 0; i < skybox.size(); ++i) {
+			glUniformMatrix4fv(loc_P_sky, 1, GL_FALSE, camera.getPerspective());
+			glUniformMatrix4fv(loc_V_sky, 1, GL_FALSE, camera.getTransformF());
+
 			glm::mat4 model;
-			model = glm::translate(model, skybox[i]->m_position);
-			model = glm::rotate(model, skybox[i]->m_angle, skybox[i]->m_rotation);
+			model = glm::rotate(model, rotation_radians[0], glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, rotation_radians[1], glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::translate(model, *sky_sphere->getPosition());
+			glUniformMatrix4fv(loc_M_sky, 1, GL_FALSE, glm::value_ptr(model));
 
-			glUniformMatrix4fv(loc_M_stars, 1, GL_FALSE, glm::value_ptr(model));
-			skybox[i]->render();
+			// update time
+			time = (float)glfwGetTime();
+			glUniform1f(loc_sky_time, time);
+			glUniform1f(loc_sky_speed, sky_speed);
+			glUniform1f(loc_sky_radius, radius);
+			glUniform1f(loc_sky_elevation, elevation);
+			glUniform1i(loc_sky_seed, sky_seed);
+			glUniform1f(loc_sky_frequency, sky_frequency);
+			glUniform1i(loc_sky_octaves, sky_octaves);
+			glUniform3fv(loc_sky_color, 1, &sky_color[0]);
+
+			sky_sphere->render();
 		}
+
+		
 
 		glUseProgram(0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -664,14 +668,15 @@ void input_handler(GLFWwindow* _window, double _dT)
 
 void GL_calls()
 {
-	glClearColor(0.01f, 0.01f, 0.01f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 	glDisable(GL_TEXTURE);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
