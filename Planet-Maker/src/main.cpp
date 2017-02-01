@@ -16,7 +16,7 @@
 #include "CustomPlane.h"
 
 void input_handler(GLFWwindow* _window, double _dT);
-void camera_handler(GLFWwindow* _window, double _dT, Camera* _cam);
+// void camera_handler(GLFWwindow* _window, double _dT, Camera* _cam);
 void GL_calls();
 
 static const float M_PI = 3.141592653f;
@@ -36,6 +36,13 @@ static glm::vec3* background_pos = new glm::vec3(0.0f, 0.0f, 3.0f);
 
 // 2 DO
 
+bool ocean_enabled = true;
+float ocean_frequency = 4.0f;
+int ocean_seed = 0;
+int ocean_octaves = 6;
+float ocean_color_1[3] = { 0.0f,0.352941f,1.0f };
+float ocean_color_2[3] = { 0.0f,0.231142f,0.654902f };
+
 // ________ TERRAIN _________
 // Procedural related variables
 int segments = 32;
@@ -47,8 +54,8 @@ float frag_frequency = 4.0f;
 int octaves = 6;
 int seed = 0;
 
-float color_water_1[3] = { 0.0f,0.352941f,1.0f };
-float color_water_2[3] = { 0.0f,0.231142f,0.654902f };
+float color_water_1[3] = { 0.1f,0.1f,0.1f };
+float color_water_2[3] = { 0.3f,0.3f,0.3f };
 float color_ground_1[3] = { 0.0821223f,0.698039f,0.140091f };
 float color_ground_2[3] = { 0.0535179f,0.454902f,0.0912952f };
 float color_mountain_1[3] = { 0.286275f,0.286275f,0.286275f };
@@ -60,7 +67,7 @@ bool use_cell = false;
 
 // ________ SKY _________
 // Procedural related variables
-bool enable_sky = true;
+bool sky_enabled = true;
 
 float sky_frequency = 4.0f;
 int sky_seed = 0;
@@ -234,15 +241,6 @@ int main() {
 	float rotation_degrees[2] = { 0.0f,0.0f };
 	float rotation_radians[2] = { 0.0f,0.0f };
 
-	// __________ WATER ______________
-
-	Shader water_shader;
-	water_shader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
-
-	GLint loc_P_water = glGetUniformLocation(water_shader.programID, "P"); // perspective matrix
-	GLint loc_V_water = glGetUniformLocation(water_shader.programID, "V"); // modelview matrix
-	GLint loc_M_water = glGetUniformLocation(water_shader.programID, "M"); // modelview matrix
-
 	// __________ TERRAIN ______________
 	Shader terrain_shader;
 	terrain_shader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
@@ -288,6 +286,24 @@ int main() {
 	GLint loc_sky_seed = glGetUniformLocation(sky_shader.programID, "seed");
 	GLint loc_sky_color = glGetUniformLocation(sky_shader.programID, "sky_color");
 
+	// __________ OCEAN ______________
+
+	Shader ocean_shader;
+	ocean_shader.createShader("shaders/ocean_vert.glsl", "shaders/ocean_frag.glsl");
+
+	GLint loc_P_ocean = glGetUniformLocation(ocean_shader.programID, "P"); // perspective matrix
+	GLint loc_V_ocean = glGetUniformLocation(ocean_shader.programID, "V"); // modelview matrix
+	GLint loc_M_ocean = glGetUniformLocation(ocean_shader.programID, "M"); // modelview matrix
+
+	GLint loc_ocean_radius = glGetUniformLocation(ocean_shader.programID, "radius");
+	GLfloat loc_ocean_elevation = glGetUniformLocation(ocean_shader.programID, "elevationModifier");
+
+	GLint loc_ocean_frequency = glGetUniformLocation(ocean_shader.programID, "frequency");
+	GLint loc_ocean_octaves = glGetUniformLocation(ocean_shader.programID, "octaves");
+	GLint loc_ocean_seed = glGetUniformLocation(ocean_shader.programID, "seed");
+	GLint loc_ocean_color_1 = glGetUniformLocation(ocean_shader.programID, "color_1");
+	GLint loc_ocean_color_2 = glGetUniformLocation(ocean_shader.programID, "color_2");
+
 	// __________ STAR BACKGROUND ______________
 
 	Shader stars_shader;
@@ -306,8 +322,9 @@ int main() {
 
 	// _____________________________________________________
 
-	terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
-	sky_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
+	terrain_sphere = new Sphere(.0f, 0.0f, 0.0f, 1.0f, segments);
+	sky_sphere = new Sphere(1.0f, 0.0f, 0.0f, 1.0f, 32);
+	ocean_sphere = new Sphere(-1.0f, 0.0f, 0.0f, 1.0f, 32);
 
 	Camera camera;
 	camera.setPosition(&glm::vec3(0.f, 0.f, 3.0f));
@@ -379,12 +396,25 @@ int main() {
 			if (ImGui::BeginMenu("Clouds")) {
 
 				ImGui::Text("Clouds");
-				ImGui::Checkbox("Enable clouds", &enable_sky);
+				ImGui::Checkbox("Enable clouds", &sky_enabled);
 				ImGui::ColorEdit3("Color", sky_color);
 				ImGui::SliderInt("Octaves", &sky_octaves, 1, 10);
 				ImGui::SliderFloat("Frequency", &sky_frequency, 0.01f, 10.0f);
 				ImGui::SliderInt("Seed", &sky_seed, 0, 10000);
 				ImGui::SliderFloat("Speed", &sky_speed, 0.0f, 2.0f);
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Ocean")) {
+
+				ImGui::Text("Ocean");
+				ImGui::Checkbox("Enable ocean", &ocean_enabled);
+				ImGui::ColorEdit3("Color 1", ocean_color_1);
+				ImGui::ColorEdit3("Color 2", ocean_color_2);
+				ImGui::SliderInt("Octaves", &ocean_octaves, 1, 10);
+				ImGui::SliderFloat("Frequency", &ocean_frequency, 0.01f, 10.0f);
+				ImGui::SliderInt("Seed", &ocean_seed, 0, 10000);
 
 				ImGui::EndMenu();
 			}
@@ -538,7 +568,7 @@ int main() {
 		terrain_sphere->render();
 
 		// SKY SHADER
-		if (enable_sky) {
+		if (sky_enabled) {
 			glUseProgram(sky_shader.programID);
 
 			glUniformMatrix4fv(loc_P_sky, 1, GL_FALSE, camera.getPerspective());
@@ -562,6 +592,30 @@ int main() {
 			glUniform3fv(loc_sky_color,1, &sky_color[0]);
 
 			sky_sphere->render();
+		}
+
+		// OCEAN SHADER
+		if (ocean_enabled) {
+			glUseProgram(ocean_shader.programID);
+
+			glUniformMatrix4fv(loc_P_ocean, 1, GL_FALSE, camera.getPerspective());
+			glUniformMatrix4fv(loc_V_ocean, 1, GL_FALSE, camera.getTransformF());
+
+			glm::mat4 model;
+			model = glm::rotate(model, rotation_radians[0], glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, rotation_radians[1], glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::translate(model, *ocean_sphere->getPosition());
+			glUniformMatrix4fv(loc_M_ocean, 1, GL_FALSE, glm::value_ptr(model));
+
+			glUniform1f(loc_ocean_radius, radius);
+			glUniform1f(loc_ocean_elevation, elevation);
+			glUniform1i(loc_ocean_seed, ocean_seed);
+			glUniform1f(loc_ocean_frequency, ocean_frequency);
+			glUniform1i(loc_ocean_octaves, ocean_octaves);
+			glUniform3fv(loc_ocean_color_1, 1, &ocean_color_1[0]);
+			glUniform3fv(loc_ocean_color_2, 1, &ocean_color_2[0]);
+
+			ocean_sphere->render();
 		}
 
 		// STARS SHADER
@@ -593,7 +647,9 @@ int main() {
 	}
 
 	ImGui_ImplGlfw_Shutdown();
+	delete ocean_sphere;
 	delete terrain_sphere;
+	delete sky_sphere;
 
 	return 0;
 }

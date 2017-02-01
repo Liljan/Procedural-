@@ -189,29 +189,26 @@ uniform int seed;
 uniform int octaves;
 uniform float frequency;
 
-uniform vec3 sky_color;
+uniform vec3 color_1;
+uniform vec3 color_2;
 
 out vec4 color;
 
 void main() {
 
-  vec3 diffuse_color = sky_color;
+  vec3 diffuse_color;
 
-  float opacity;
+  float opacity = 0.6;
 
-  float noise = cnoise(frequency*vec3(pos + seed + 0.1 * speed * time));
+  float noise = cnoise(frequency*vec3(pos + seed));
 
   // 1th to (n-1):th octave
   for(float o = 1.0; o < octaves; o++)
   {
-    noise += 1.0 / (pow(2, o)) * cnoise((o + 1.0) * frequency * vec3(pos + seed + 0.1 * speed * time));
+    noise += 1.0 / (pow(2, o)) * cnoise((o + 1.0) * frequency * vec3(pos + seed));
   }
 
-  //opacity = noise;
-  opacity = 0.3;
+  diffuse_color = mix(color_1, color_2, noise);
 
- /* if(opacity < 0.1)
-    color = vec4(0.0,0.0,1.0,0.05);
-  else*/
-    color = vec4(diffuse_color,opacity);
+  color = vec4(diffuse_color,opacity);
 }
