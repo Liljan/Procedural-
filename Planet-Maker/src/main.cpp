@@ -240,7 +240,7 @@ int main() {
 	GLint loc_color_rock = glGetUniformLocation(terrain_shader.programID, "color_rock"); // mountain color of the planet
 	GLint loc_color_snow = glGetUniformLocation(terrain_shader.programID, "color_snow"); // mountain color of the planet
 
-	GLint loc_method = glGetUniformLocation(terrain_shader.programID, "noise_method");
+	GLint loc_terrain_method = glGetUniformLocation(terrain_shader.programID, "noise_method");
 
 	GLfloat loc_radius = glGetUniformLocation(terrain_shader.programID, "radius");
 	GLfloat loc_elevation = glGetUniformLocation(terrain_shader.programID, "elevationModifier");
@@ -261,6 +261,8 @@ int main() {
 	GLint loc_sky_radius = glGetUniformLocation(sky_shader.programID, "radius");
 	GLfloat loc_sky_elevation = glGetUniformLocation(sky_shader.programID, "elevationModifier");
 
+	GLint loc_sky_method = glGetUniformLocation(sky_shader.programID, "noise_method");
+
 	GLint loc_sky_time = glGetUniformLocation(sky_shader.programID, "time");
 	GLint loc_sky_speed = glGetUniformLocation(sky_shader.programID, "speed");
 	GLint loc_sky_frequency = glGetUniformLocation(sky_shader.programID, "frequency");
@@ -280,6 +282,8 @@ int main() {
 	GLint loc_light_position = glGetUniformLocation(ocean_shader.programID, "light_pos");
 	GLint loc_light_intensity = glGetUniformLocation(ocean_shader.programID, "light_intensity");
 	GLint loc_shininess = glGetUniformLocation(ocean_shader.programID, "shininess");
+
+	GLint loc_ocean_method = glGetUniformLocation(ocean_shader.programID, "noise_method");
 
 	GLint loc_ocean_radius = glGetUniformLocation(ocean_shader.programID, "radius");
 	GLfloat loc_ocean_elevation = glGetUniformLocation(ocean_shader.programID, "elevationModifier");
@@ -326,6 +330,7 @@ int main() {
 			ImGui::Text("Procedural Planet Maker");
 			ImGui::Separator();
 			ImGui::Text("Use CTRL + W,A,S,D to move camera \nfreely.");
+			ImGui::Separator();
 
 			ImGui::Text("Geometry");
 
@@ -527,7 +532,6 @@ int main() {
 		glUseProgram(stars_shader.programID);
 		glUniformMatrix4fv(loc_P_stars, 1, GL_FALSE, camera.getPerspective());
 		glUniformMatrix4fv(loc_V_stars, 1, GL_FALSE, camera.getTransformF());
-		//glUniformMatrix4fv(loc_P_stars, 1, GL_FALSE, mCamera.getPerspective());
 
 		for (int i = 0; i < skybox.size(); ++i) {
 			glm::mat4 model;
@@ -550,7 +554,7 @@ int main() {
 		model = glm::translate(model, *sky_sphere->getPosition());
 		glUniformMatrix4fv(loc_M_terrain, 1, GL_FALSE, glm::value_ptr(model));
 
-		glUniform1i(loc_method, noise_method);
+		glUniform1i(loc_terrain_method, noise_method);
 
 		glUniform1f(loc_radius, radius);
 		glUniform1f(loc_elevation, elevation);
@@ -580,6 +584,8 @@ int main() {
 			model = glm::translate(model, *ocean_sphere->getPosition());
 			glUniformMatrix4fv(loc_M_ocean, 1, GL_FALSE, glm::value_ptr(model));
 
+			glUniform1i(loc_ocean_method, noise_method);
+
 			glUniform3fv(loc_light_position, 1, &light_position[0]);
 			glUniform1f(loc_light_intensity, light_intensity);
 			glUniform1f(loc_shininess, shininess);
@@ -607,6 +613,8 @@ int main() {
 			model = glm::rotate(model, rotation_radians[1], glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::translate(model, *sky_sphere->getPosition());
 			glUniformMatrix4fv(loc_M_sky, 1, GL_FALSE, glm::value_ptr(model));
+
+			glUniform1i(loc_sky_method, noise_method);
 
 			// update time
 			time = (float)glfwGetTime();
