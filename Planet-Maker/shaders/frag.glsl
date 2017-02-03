@@ -218,9 +218,6 @@ vec2 snow_range = vec2(-0.7,1.0);
 
 void main() {
 
-  //vec3 mixLava = mix(color_low,color_glow,cnoise( vec3(height) * 0.8));
-  //vec3 mixMtn = mix(color_high,color_med, cnoise( 2.0 * vec3(10.0*height) ) );
-
   vec3 watermix;
   vec3 groundmix;
   vec3 mountainmix;
@@ -233,66 +230,22 @@ void main() {
     noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frag_frequency*vec3(pos + seed));
   }
 
-  /*
-  watermix = mix(color_water_1, color_water_2, noise);
-  groundmix = mix(color_ground_1,color_ground_2, noise);
-  mountainmix = mix(color_mountain_1,color_mountain_2, noise);
-  */
-
   vec3 diffusecolor;
-
-
-
-  //diffusecolor = watermix;
 
   // height: from 0 to 1
   float int_dir = 0.02;
-  /*float deep = smoothstep(deep_range.x - 0.1, deep_range.x, height) - smoothstep(deep_range.y - 0.1, deep_range.y, height);
-  float beach = smoothstep(beach_range.x - int_dir, beach_range.x, height) - smoothstep(beach_range.y - int_dir, beach_range.y, height);
-  float grass = smoothstep(grass_range.x - int_dir, grass_range.x, height) - smoothstep(grass_range.y - int_dir, grass_range.y, height);
-  float rock = smoothstep(rock_range.x - int_dir, rock_range.x, height) - smoothstep(rock_range.y - int_dir, rock_range.y, height);
-  float snow = smoothstep(snow_range.x - int_dir, snow_range.x, height) - smoothstep(snow_range.y - int_dir, snow_range.y, height);*/
 
-  /*diffusecolor = mix(color_deep,color_beach,beach);
-  diffusecolor = mix(diffusecolor, color_grass, grass);
-  diffusecolor = mix(diffusecolor, color_rock, rock);
-  diffusecolor = mix(diffusecolor, color_snow, snow);*/
-
-
-  //float beach = smoothstep(0.0,0.1,height) - smoothstep(0.11,0.25,height);
-  float beach = smoothstep(0.0,0.2,height);
-  float grass = smoothstep(0.15,0.3,height);
-  float rock = smoothstep(0.25,0.8,height);
+  float beach = smoothstep(0.0,0.1,height);
+  float grass = smoothstep(0.0,0.3,height);
+  float rock = smoothstep(0.2,0.5,height);
   float snow = smoothstep(0.7, 0.85, height);
-  //float snow = mix()
 
   diffusecolor = mix(color_deep, color_beach, beach);
   diffusecolor = mix(diffusecolor, color_grass, grass);
   diffusecolor = mix(diffusecolor, color_rock, rock);
   diffusecolor = mix(diffusecolor, color_snow, snow);
 
-
- /* float low = smoothstep(deep_range.x - 0.1, deep_range.x, height) - smoothstep(deep_range.y - 0.1, deep_range.y, height);
-  float high = smoothstep(snow_range.x - int_dir, snow_range.x, height) - smoothstep(snow_range.y - int_dir, snow_range.y, height);
-
-  diffusecolor = mix(color_deep,color_snow,low);
-*/
-/*
-  if(height < 0.005)
-    diffusecolor = watermix;
-  else if(height < 0.1)
-    diffusecolor = groundmix;
-  else if(height < 0.375)
-    diffusecolor = color_ground_1;
-  else if(height < 0.625)
-    diffusecolor = color_ground_2;
-  else if(height < 0.75)
-    diffusecolor = color_mountain_1;
-  else
-    diffusecolor = color_mountain_2;
-    
-  //diffusecolor = vec3(0.1,0.2,0.4);
-
+  /*
   vec3 kd = vec3(0.7,0.7,0.7);
   vec3 ka = vec3(0.1,0.1,0.1);
   vec3 ks = vec3(0.2,0.2,0.2);
@@ -313,7 +266,7 @@ void main() {
     color = vec4(diffuselighting + specular, 1.0);
   else
     color = vec4(diffuselighting, 1.0);
-    */
+   */
 
     color = vec4(diffusecolor,1.0);
 }
