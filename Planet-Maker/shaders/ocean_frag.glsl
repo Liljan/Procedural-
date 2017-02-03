@@ -215,6 +215,7 @@ void main() {
   }
 
   diffuse_color = mix(color_1, color_2, noise);
+  diffuse_color = diffuse_color - 0.1 * cnoise(800.0 * pos + seed);
 
   vec3 kd = vec3(0.7,0.7,0.7);
   vec3 ka = vec3(0.1,0.1,0.1);

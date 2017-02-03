@@ -229,18 +229,22 @@ void main() {
   // height: from 0 to 1
   float int_dir = 0.02;
 
+  vec3 c_d = color_deep - 0.1 * cnoise(10.0 * pos + seed);
+  vec3 c_b = color_beach - 0.05 * cnoise(100.0 * pos + seed);
   vec3 c_g = color_grass - 0.1 * cnoise(1060.0 * pos + seed);
-  vec3 c_r = color_rock - 0.2 * cnoise(1000 * pos + seed);
+  vec3 c_r = color_rock - 0.3 * cnoise(400.0 * pos + seed);
+  vec3 c_s = color_snow - 0.1 * cnoise(40.0 * pos + seed);
+
 
   float beach = smoothstep(0.0,0.1,height);
   float grass = smoothstep(0.0,0.3,height);
   float rock = smoothstep(0.2,0.5,height);
   float snow = smoothstep(0.7, 0.85, height);
 
-  diffusecolor = mix(color_deep, color_beach, beach);
+  diffusecolor = mix(color_deep, c_b, beach);
   diffusecolor = mix(diffusecolor, c_g, grass);
   diffusecolor = mix(diffusecolor, c_r, rock);
-  diffusecolor = mix(diffusecolor, color_snow, snow);
+  diffusecolor = mix(diffusecolor, c_s, snow);
 
   color = vec4(diffusecolor,1.0);
 }

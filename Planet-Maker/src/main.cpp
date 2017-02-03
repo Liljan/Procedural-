@@ -43,7 +43,7 @@ float ocean_color_2[3] = { 0.0f,0.231142f,0.654902f };
 
 // ________ TERRAIN _________
 // Procedural related variables
-int segments = 32;
+int segments = 100;
 float elevation = 0.1f;
 float radius = 0.01f;
 float lacunarity = 1.0f;
@@ -333,6 +333,7 @@ int main() {
 		{
 			ImGui::Text("Procedural Planet Maker");
 			ImGui::Separator();
+			ImGui::Text("Use CTRL + W,A,S,D to move camera \nfreely.");
 
 			ImGui::Text("Geometry");
 
@@ -469,6 +470,7 @@ int main() {
 			ImGui::Checkbox("Draw wireframe", &draw_wireframe);
 
 			if (ImGui::Button("Reload shaders")) {
+				sky_shader.createShader("shaders/ocean_vert.glsl", "shaders/ocean_frag.glsl");
 				terrain_shader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
 				sky_shader.createShader("shaders/sky_vert.glsl", "shaders/sky_frag.glsl");
 				stars_shader.createShader("shaders/star_vert.glsl", "shaders/star_frag.glsl");
