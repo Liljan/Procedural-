@@ -13,6 +13,7 @@ uniform float elevationModifier;
 out vec3 interpolatedNormal;
 
 out vec3 pos;
+out vec3 cam_pos;
 
 void main(){
   float height = 0.01;
@@ -22,5 +23,6 @@ void main(){
 
   gl_Position = (P * V * M) * vec4(pos, 1.0);
 
-  interpolatedNormal = mat3(V*M) * Normal;
+  interpolatedNormal = mat3(V * M) * Normal;
+  cam_pos = mat3(V * M) * Position;
 }

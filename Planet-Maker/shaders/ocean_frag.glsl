@@ -182,8 +182,14 @@ float pnoise(vec3 P, vec3 rep)
 
 in vec3 interpolatedNormal;
 in vec3 pos;
+in vec3 cam_pos;
 
-uniform float time;
+// Light
+uniform float light_intensity;
+uniform vec3 light_pos;
+uniform float shininess;
+
+// procedural
 uniform float speed;
 uniform int seed;
 uniform int octaves;
@@ -210,5 +216,21 @@ void main() {
 
   diffuse_color = mix(color_1, color_2, noise);
 
-  color = vec4(diffuse_color,opacity);
+  vec3 kd = vec3(0.7,0.7,0.7);
+  vec3 ka = vec3(0.1,0.1,0.1);
+  vec3 ks = vec3(0.2,0.2,0.2);
+
+  vec3 normal = normalize(interpolatedNormal);
+  vec3 viewDir = normalize(cam_pos);
+
+  vec3 s = normalize(vec3(light_pos) - pos);
+  vec3 r = reflect(-s,normal);
+
+  vec3 ambient = ka * light_intensity; // * intensity
+  vec3 diffuse = kd * max(dot(s,normal), 0.0) * light_intensity; // * intensity
+  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess);
+
+  vec3 diffuse_lighting = diffuse_color * (ka + kd);
+
+  color = vec4(diffuse_lighting + specular,opacity);
 }

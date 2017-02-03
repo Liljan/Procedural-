@@ -238,15 +238,11 @@ int main() {
 
 	// __________ TERRAIN ______________
 	Shader terrain_shader;
-	terrain_shader.createShader("shaders/vert.glsl", "shaders/frag.glsl");
+	terrain_shader.createShader("shaders/terrain_vert.glsl", "shaders/terrain_frag.glsl");
 
 	GLint loc_P_terrain = glGetUniformLocation(terrain_shader.programID, "P"); // perspective matrix
 	GLint loc_V_terrain = glGetUniformLocation(terrain_shader.programID, "V"); // modelview matrix
 	GLint loc_M_terrain = glGetUniformLocation(terrain_shader.programID, "M"); // modelview matrix
-
-	GLint loc_light_position = glGetUniformLocation(terrain_shader.programID, "light_pos");
-	GLint loc_light_intensity = glGetUniformLocation(terrain_shader.programID, "light_intensity");
-	GLint loc_shininess = glGetUniformLocation(terrain_shader.programID, "shininess");
 
 	GLint loc_color_deep = glGetUniformLocation(terrain_shader.programID, "color_deep"); // water color of the planet
 	GLint loc_color_beach = glGetUniformLocation(terrain_shader.programID, "color_beach"); // ground color of the planet
@@ -289,9 +285,12 @@ int main() {
 	GLint loc_V_ocean = glGetUniformLocation(ocean_shader.programID, "V"); // modelview matrix
 	GLint loc_M_ocean = glGetUniformLocation(ocean_shader.programID, "M"); // modelview matrix
 
+	GLint loc_light_position = glGetUniformLocation(ocean_shader.programID, "light_pos");
+	GLint loc_light_intensity = glGetUniformLocation(ocean_shader.programID, "light_intensity");
+	GLint loc_shininess = glGetUniformLocation(ocean_shader.programID, "shininess");
+
 	GLint loc_ocean_radius = glGetUniformLocation(ocean_shader.programID, "radius");
 	GLfloat loc_ocean_elevation = glGetUniformLocation(ocean_shader.programID, "elevationModifier");
-
 	GLint loc_ocean_frequency = glGetUniformLocation(ocean_shader.programID, "frequency");
 	GLint loc_ocean_octaves = glGetUniformLocation(ocean_shader.programID, "octaves");
 	GLint loc_ocean_seed = glGetUniformLocation(ocean_shader.programID, "seed");
@@ -554,10 +553,6 @@ int main() {
 		model = glm::translate(model, *sky_sphere->getPosition());
 		glUniformMatrix4fv(loc_M_terrain, 1, GL_FALSE, glm::value_ptr(model));
 
-		glUniform3fv(loc_light_position, 1, &light_position[0]);
-		glUniform1f(loc_light_intensity, light_intensity);
-		glUniform1f(loc_shininess, shininess);
-
 		glUniform1f(loc_radius, radius);
 		glUniform1f(loc_elevation, elevation);
 		glUniform1i(loc_seed, seed);
@@ -585,6 +580,10 @@ int main() {
 			model = glm::rotate(model, rotation_radians[1], glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::translate(model, *ocean_sphere->getPosition());
 			glUniformMatrix4fv(loc_M_ocean, 1, GL_FALSE, glm::value_ptr(model));
+
+			glUniform3fv(loc_light_position, 1, &light_position[0]);
+			glUniform1f(loc_light_intensity, light_intensity);
+			glUniform1f(loc_shininess, shininess);
 
 			glUniform1f(loc_ocean_radius, radius);
 			glUniform1f(loc_ocean_elevation, elevation);

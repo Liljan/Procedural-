@@ -180,26 +180,93 @@ float pnoise(vec3 P, vec3 rep)
   return 2.2 * n_xyz;
 }
 
-// THIS IS WHERE THE FUN BEGINS
+// END OF SMART NOISE FUNCTIONS
 
+
+// MY NOT SO GLORIOUS CODE BEGINS
+
+in vec3 interpolatedNormal;
+in float height;
+
+in vec3 camPos;
 in vec3 pos;
+
+uniform float light_intensity;
+uniform vec3 light_pos;
+uniform float shininess;
+
+uniform vec3 color_deep; // water color of the planet
+uniform vec3 color_beach; // beach color of the planet
+uniform vec3 color_grass; // grass color of the planet
+uniform vec3 color_rock; // rock color of the planet
+uniform vec3 color_snow; // snow color of the planet
+
+uniform int seed;
+
+uniform float frag_frequency;
+uniform int octaves;
 
 out vec4 color;
 
-float frequency = 100.0;
+// height ranges
+
+vec2 deep_range = vec2(0.0,0.005);
+vec2 beach_range = vec2(0.005,0.2);
+vec2 grass_range = vec2(0.2,0.625);
+vec2 rock_range = vec2(0.5,0.75);
+vec2 snow_range = vec2(-0.7,1.0);
 
 void main() {
 
-  //vec3 diffusecolor = vec3(1.0,1.0,1.0);
+  vec3 watermix;
+  vec3 groundmix;
+  vec3 mountainmix;
 
-  //float noise = cnoise(frequency*vec3(pos));
+  float noise = cnoise(frag_frequency*vec3(pos + seed));
 
   // 1th to (n-1):th octave
- /* for(float o = 1.0; o < 6; o++)
+  for(float o = 1.0; o < octaves; o++)
   {
-    noise += 1.0 / (pow(2, o)) * cnoise((o + 1.0) * frequency * vec3(pos));
-  }*/
+    noise += 1.0 / (pow(2,o)) * cnoise((o+1.0)*frag_frequency*vec3(pos + seed));
+  }
 
-  //color = vec4(step(0.6,noise)*diffusecolor,1.0);
-  color = vec4(0.4,0.6,0.7,1.0);
+  vec3 diffusecolor;
+
+  // height: from 0 to 1
+  float int_dir = 0.02;
+
+  float beach = smoothstep(0.0,0.1,height);
+  float grass = smoothstep(0.0,0.3,height);
+  float rock = smoothstep(0.2,0.5,height);
+  float snow = smoothstep(0.7, 0.85, height);
+
+  diffusecolor = mix(color_deep, color_beach, beach);
+  diffusecolor = mix(diffusecolor, color_grass, grass);
+  diffusecolor = mix(diffusecolor, color_rock, rock);
+  diffusecolor = mix(diffusecolor, color_snow, snow);
+
+  /*
+  vec3 kd = vec3(0.7,0.7,0.7);
+  vec3 ka = vec3(0.1,0.1,0.1);
+  vec3 ks = vec3(0.2,0.2,0.2);
+
+  vec3 normal = normalize(interpolatedNormal);
+  vec3 viewDir = normalize(camPos);
+
+  vec3 s = normalize(vec3(light_pos) - pos);
+  vec3 r = reflect(-s,normal);
+
+  vec3 ambient = ka * light_intensity; // * intensity
+  vec3 diffuse = kd * max(dot(s,normal), 0.0) * light_intensity; // * intensity
+  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess);
+
+  vec3 diffuselighting = diffusecolor * (ka + kd);
+
+  if(height < 0.1)
+    color = vec4(diffuselighting + specular, 1.0);
+  else
+    color = vec4(diffuselighting, 1.0);
+   */
+
+    color = vec4(diffusecolor,1.0);
 }
