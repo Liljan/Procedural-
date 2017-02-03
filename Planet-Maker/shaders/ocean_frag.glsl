@@ -218,7 +218,7 @@ void main() {
 
   vec3 kd = vec3(0.7,0.7,0.7);
   vec3 ka = vec3(0.1,0.1,0.1);
-  vec3 ks = vec3(0.2,0.2,0.2);
+  vec3 ks = vec3(0.4,0.4,0.4);
 
   vec3 normal = normalize(interpolatedNormal);
   vec3 viewDir = normalize(cam_pos);
@@ -226,9 +226,9 @@ void main() {
   vec3 s = normalize(vec3(light_pos) - pos);
   vec3 r = reflect(-s,normal);
 
-  vec3 ambient = ka * light_intensity; // * intensity
-  vec3 diffuse = kd * max(dot(s,normal), 0.0) * light_intensity; // * intensity
-  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess);
+  vec3 ambient = ka;
+  vec3 diffuse = kd * max(dot(s,normal), 0.0);
+  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess) * light_intensity;
 
   vec3 diffuse_lighting = diffuse_color * (ka + kd);
 

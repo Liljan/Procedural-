@@ -210,12 +210,6 @@ out vec4 color;
 
 // height ranges
 
-vec2 deep_range = vec2(0.0,0.005);
-vec2 beach_range = vec2(0.005,0.2);
-vec2 grass_range = vec2(0.2,0.625);
-vec2 rock_range = vec2(0.5,0.75);
-vec2 snow_range = vec2(-0.7,1.0);
-
 void main() {
 
   vec3 watermix;
@@ -235,38 +229,18 @@ void main() {
   // height: from 0 to 1
   float int_dir = 0.02;
 
+  vec3 c_g = color_grass - 0.1 * cnoise(1060.0 * pos + seed);
+  vec3 c_r = color_rock - 0.2 * cnoise(1000 * pos + seed);
+
   float beach = smoothstep(0.0,0.1,height);
   float grass = smoothstep(0.0,0.3,height);
   float rock = smoothstep(0.2,0.5,height);
   float snow = smoothstep(0.7, 0.85, height);
 
   diffusecolor = mix(color_deep, color_beach, beach);
-  diffusecolor = mix(diffusecolor, color_grass, grass);
-  diffusecolor = mix(diffusecolor, color_rock, rock);
+  diffusecolor = mix(diffusecolor, c_g, grass);
+  diffusecolor = mix(diffusecolor, c_r, rock);
   diffusecolor = mix(diffusecolor, color_snow, snow);
 
-  /*
-  vec3 kd = vec3(0.7,0.7,0.7);
-  vec3 ka = vec3(0.1,0.1,0.1);
-  vec3 ks = vec3(0.2,0.2,0.2);
-
-  vec3 normal = normalize(interpolatedNormal);
-  vec3 viewDir = normalize(camPos);
-
-  vec3 s = normalize(vec3(light_pos) - pos);
-  vec3 r = reflect(-s,normal);
-
-  vec3 ambient = ka * light_intensity; // * intensity
-  vec3 diffuse = kd * max(dot(s,normal), 0.0) * light_intensity; // * intensity
-  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess);
-
-  vec3 diffuselighting = diffusecolor * (ka + kd);
-
-  if(height < 0.1)
-    color = vec4(diffuselighting + specular, 1.0);
-  else
-    color = vec4(diffuselighting, 1.0);
-   */
-
-    color = vec4(diffusecolor,1.0);
+  color = vec4(diffusecolor,1.0);
 }

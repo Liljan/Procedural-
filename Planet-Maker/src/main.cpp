@@ -227,7 +227,7 @@ int main() {
 	float time;
 	float sky_speed = 1.0f;
 	bool is_paused = false;
-	bool fpsResetBool = false;
+	bool FPS_reset = false;
 
 	double last_time = glfwGetTime();
 	double delta_time = 0.0;
@@ -374,11 +374,11 @@ int main() {
 					ImGui::SetTooltip("Frequency of the noise.");
 
 				ImGui::Spacing();
-				ImGui::ColorEdit3("Low color 2", color_deep);
-				ImGui::ColorEdit3("Medium color 1", color_beach);
-				ImGui::ColorEdit3("Medium color 2", color_grass);
-				ImGui::ColorEdit3("High color 1", color_rock);
-				ImGui::ColorEdit3("High color 2", color_snow);
+				ImGui::ColorEdit3("Deep color", color_deep);
+				ImGui::ColorEdit3("Beach color", color_beach);
+				ImGui::ColorEdit3("Grass color", color_grass);
+				ImGui::ColorEdit3("Mountain color", color_rock);
+				ImGui::ColorEdit3("Snow color", color_snow);
 
 				ImGui::EndMenu();
 			}
@@ -397,6 +397,8 @@ int main() {
 
 				ImGui::EndMenu();
 			}
+
+			ImGui::Separator();
 
 			if (ImGui::BeginMenu("Ocean")) {
 
@@ -506,9 +508,9 @@ int main() {
 
 		if (glfwGetKey(currentWindow, GLFW_KEY_LEFT_CONTROL))
 		{
-			if (!fpsResetBool)
+			if (!FPS_reset)
 			{
-				fpsResetBool = true;
+				FPS_reset = true;
 				glfwSetCursorPos(currentWindow, 1920 / 2, 1080 / 2);
 			}
 
@@ -516,7 +518,7 @@ int main() {
 		}
 		else
 		{
-			fpsResetBool = false;
+			FPS_reset = false;
 		}
 
 		// __________ RENDERING SETTINGS _______
