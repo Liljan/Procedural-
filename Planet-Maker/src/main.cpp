@@ -32,6 +32,11 @@ static const std::string FILE_ENDING = ".ass";
 
 static glm::vec3* background_pos = new glm::vec3(0.0f, 0.0f, 3.0f);
 
+int noise_method = 0;
+bool use_perlin = true;
+bool use_simplex = false;
+bool use_worley = false;
+
 // ________ Ocean _________
 
 bool ocean_enabled = true;
@@ -46,7 +51,6 @@ float ocean_color_2[3] = { 0.0f,0.231142f,0.654902f };
 int segments = 100;
 float elevation = 0.1f;
 float radius = 0.01f;
-float lacunarity = 1.0f;
 float vert_frequency = 4.0f;
 float frag_frequency = 4.0f;
 int octaves = 6;
@@ -57,10 +61,6 @@ float color_beach[3] = { 1.0f,0.96f,0.57f };
 float color_grass[3] = { 0.0535179f,0.454902f,0.0912952f };
 float color_rock[3] = { 0.286275f,0.286275f,0.286275f };
 float color_snow[3] = { 0.980392f,0.980392f,0.980392f };
-
-bool use_perlin = true;
-bool use_simplex = false;
-bool use_cell = false;
 
 // ________ SKY _________
 // Procedural related variables
@@ -128,7 +128,6 @@ void load_file(std::string file_name)
 		infile >> segments;
 		infile >> elevation;
 		infile >> radius;
-		infile >> lacunarity;
 		infile >> vert_frequency;
 		infile >> octaves;
 		infile >> seed;
@@ -139,10 +138,6 @@ void load_file(std::string file_name)
 		file_to_color(infile, color_grass);
 		file_to_color(infile, color_rock);
 		file_to_color(infile, color_snow);
-
-		infile >> use_perlin;
-		infile >> use_simplex;
-		infile >> use_cell;
 
 		infile.close();
 		delete terrain_sphere;
@@ -163,7 +158,6 @@ void save_file(std::string file_name) {
 		outfile << segments << std::endl;
 		outfile << elevation << std::endl;
 		outfile << radius << std::endl;
-		outfile << lacunarity << std::endl;
 		outfile << vert_frequency << std::endl;
 		outfile << octaves << std::endl;
 		outfile << seed << std::endl;
@@ -174,10 +168,6 @@ void save_file(std::string file_name) {
 		color_to_file(outfile, color_grass);
 		color_to_file(outfile, color_rock);
 		color_to_file(outfile, color_snow);
-
-		outfile << use_perlin << std::endl;
-		outfile << use_simplex << std::endl;
-		outfile << use_cell << std::endl;
 
 		outfile.close();
 	}
@@ -249,6 +239,8 @@ int main() {
 	GLint loc_color_grass = glGetUniformLocation(terrain_shader.programID, "color_grass"); // ground color of the planet
 	GLint loc_color_rock = glGetUniformLocation(terrain_shader.programID, "color_rock"); // mountain color of the planet
 	GLint loc_color_snow = glGetUniformLocation(terrain_shader.programID, "color_snow"); // mountain color of the planet
+
+	GLint loc_method = glGetUniformLocation(terrain_shader.programID, "noise_method");
 
 	GLfloat loc_radius = glGetUniformLocation(terrain_shader.programID, "radius");
 	GLfloat loc_elevation = glGetUniformLocation(terrain_shader.programID, "elevationModifier");
@@ -352,7 +344,6 @@ int main() {
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("Change seed to vary the noise.");
 
-			ImGui::SliderFloat("Lacunarity", &lacunarity, 0.0f, 1.0f);
 			ImGui::SliderFloat("Vertex Frequency", &vert_frequency, 0.1f, 10.0f);
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("Frequency of the noise.");
@@ -429,21 +420,24 @@ int main() {
 
 			if (ImGui::BeginMenu("Procedural method")) {
 				if (ImGui::Checkbox("Perlin Noise", &use_perlin)) {
-					use_simplex = use_cell = false;
+					use_simplex = use_worley = false;
+					noise_method = 0;
 				}
 				if (ImGui::Checkbox("Simplex Noise", &use_simplex)) {
-					use_perlin = use_cell = false;
+					use_perlin = use_worley = false;
+					noise_method = 1;
 				}
-				if (ImGui::Checkbox("Cell Noise", &use_cell)) {
+				if (ImGui::Checkbox("Cell Noise", &use_worley)) {
 					use_simplex = use_perlin = false;
+					noise_method = 2;
 				}
 				ImGui::EndMenu();
 			}
 
 			ImGui::Separator();
 			ImGui::Text("Rotation");
-			ImGui::SliderFloat("Azimuth", &rotation_degrees[1], 0.0f, 360.0f);
-			ImGui::SliderFloat("Inclination", &rotation_degrees[0], 0.0f, 360.0f);
+			ImGui::SliderFloat("Inclination", &rotation_degrees[1], 0.0f, 360.0f);
+			ImGui::SliderFloat("Azimuth", &rotation_degrees[0], 0.0f, 360.0f);
 
 			rotation_radians[0] = degree_to_radians(rotation_degrees[0]);
 			rotation_radians[1] = degree_to_radians(rotation_degrees[1]);
@@ -453,7 +447,6 @@ int main() {
 
 			if (ImGui::Button("Reset")) {
 				radius = 1.0f;
-				lacunarity = 1.0f;
 				octaves = 6;
 				seed = 0;
 
@@ -557,6 +550,8 @@ int main() {
 		model = glm::translate(model, *sky_sphere->getPosition());
 		glUniformMatrix4fv(loc_M_terrain, 1, GL_FALSE, glm::value_ptr(model));
 
+		glUniform1i(loc_method, noise_method);
+
 		glUniform1f(loc_radius, radius);
 		glUniform1f(loc_elevation, elevation);
 		glUniform1i(loc_seed, seed);
@@ -637,7 +632,6 @@ int main() {
 		ImGui::Render();
 
 		glfwSwapBuffers(currentWindow);
-
 	}
 
 	ImGui_ImplGlfw_Shutdown();
@@ -656,6 +650,7 @@ void input_handler(GLFWwindow* _window, double _dT)
 	}
 }
 
+
 void GL_calls()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -670,3 +665,4 @@ void GL_calls()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
+

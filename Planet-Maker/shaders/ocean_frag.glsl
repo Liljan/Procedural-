@@ -206,7 +206,7 @@ void main() {
 
   float opacity = 0.6;
 
-  float noise = cnoise(frequency*vec3(pos + seed));
+  float noise = cnoise(frequency * vec3(pos + seed));
 
   // 1th to (n-1):th octave
   for(float o = 1.0; o < octaves; o++)
