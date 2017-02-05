@@ -47,19 +47,19 @@ float ocean_color_2[3] = { 0.0f,0.231142f,0.654902f };
 
 // ________ TERRAIN _________
 // Procedural related variables
-int segments = 100;
-float elevation = 0.1f;
-float radius = 0.01f;
-float vert_frequency = 4.0f;
-float frag_frequency = 4.0f;
-int octaves = 6;
-int seed = 0;
+int terrain_segments = 100;
+float terrain_elevation = 0.1f;
+float terrain_radius = 0.01f;
+float terrain_vert_frequency = 4.0f;
+float terrain_frag_frequency = 4.0f;
+int terrain_octaves = 6;
+int terrain_seed = 0;
 
-float color_deep[3] = { 0.3f,0.3f,0.3f };
-float color_beach[3] = { 1.0f,0.96f,0.57f };
-float color_grass[3] = { 0.0535179f,0.454902f,0.0912952f };
-float color_rock[3] = { 0.286275f,0.286275f,0.286275f };
-float color_snow[3] = { 0.980392f,0.980392f,0.980392f };
+float terrain_color_deep[3] = { 0.3f,0.3f,0.3f };
+float terrain_color_beach[3] = { 1.0f,0.96f,0.57f };
+float terrain_color_grass[3] = { 0.0535179f,0.454902f,0.0912952f };
+float terrain_color_rock[3] = { 0.286275f,0.286275f,0.286275f };
+float terrain_color_snow[3] = { 0.980392f,0.980392f,0.980392f };
 
 // ________ SKY _________
 // Procedural related variables
@@ -125,27 +125,74 @@ void load_file(std::string file_name)
 	{
 		std::ifstream infile(file_name + FILE_ENDING, std::ifstream::binary);
 
-		infile >> segments;
-		infile >> elevation;
-		infile >> radius;
-		infile >> vert_frequency;
-		infile >> octaves;
-		infile >> seed;
+		// Noise
+		infile >> noise_method;
 
-		// colors
-		file_to_color(infile, color_deep);
-		file_to_color(infile, color_beach);
-		file_to_color(infile, color_grass);
-		file_to_color(infile, color_rock);
-		file_to_color(infile, color_snow);
+		// Sky
+		file_to_color(infile, sky_color);
+		infile >> sky_enabled;
+		infile >> sky_frequency;
+		infile >> sky_octaves;
+		infile >> sky_opacity;
+		infile >> sky_seed;
+
+		// Terrain
+
+		file_to_color(infile, terrain_color_beach);
+		file_to_color(infile, terrain_color_deep);
+		file_to_color(infile, terrain_color_grass);
+		file_to_color(infile, terrain_color_rock);
+		file_to_color(infile, terrain_color_snow);
+		infile >> terrain_elevation;
+		infile >> terrain_frag_frequency;
+		infile >> terrain_octaves;
+		infile >> terrain_radius;
+		infile >> terrain_seed;
+		infile >> terrain_segments;
+		infile >> terrain_vert_frequency;
+
+		// Ocean
+
+		file_to_color(infile, ocean_color_1);
+		file_to_color(infile, ocean_color_2);
+		infile >> ocean_enabled;
+		infile >> ocean_frequency;
+		infile >> ocean_octaves;
+		infile >> ocean_seed;
+
+		switch (noise_method)
+		{
+		case 0:
+			use_perlin = true;
+			use_simplex = use_worley = false;
+			break;
+		case 1:
+			use_simplex = true;
+			use_perlin = use_worley = false;
+			break;
+		case 2:
+			use_worley = true;
+			use_perlin = use_simplex = false;
+			break;
+
+		default:
+			std::cout << "Error reading file." << std::endl;
+			break;
+		}
 
 		infile.close();
+		delete sky_sphere;
 		delete terrain_sphere;
-		terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+		delete ocean_sphere;
+
+		sky_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
+		terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, terrain_segments);
+		ocean_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
+
 	}
 	catch (const std::exception&)
 	{
-		std::cout << "Error loading" << std::endl;
+		std::cout << "Error loading file." << std::endl;
 	}
 }
 
@@ -156,8 +203,38 @@ void save_file(std::string file_name) {
 	{
 		std::ofstream outfile(file_name + FILE_ENDING, std::ofstream::binary);
 
-		// Sky
+		// Noise
+		outfile << noise_method << std::endl;
 
+		// Sky
+		color_to_file(outfile, sky_color);
+		outfile << sky_enabled << std::endl;
+		outfile << sky_frequency << std::endl;
+		outfile << sky_octaves << std::endl;
+		outfile << sky_opacity << std::endl;
+		outfile << sky_seed << std::endl;
+
+		// Terrain
+		color_to_file(outfile, terrain_color_beach);
+		color_to_file(outfile, terrain_color_deep);
+		color_to_file(outfile, terrain_color_grass);
+		color_to_file(outfile, terrain_color_rock);
+		color_to_file(outfile, terrain_color_snow);
+		outfile << terrain_elevation << std::endl;
+		outfile << terrain_frag_frequency << std::endl;
+		outfile << terrain_octaves << std::endl;
+		outfile << terrain_radius << std::endl;
+		outfile << terrain_seed << std::endl;
+		outfile << terrain_segments << std::endl;
+		outfile << terrain_vert_frequency << std::endl;
+
+		// Ocean
+		color_to_file(outfile, ocean_color_1);
+		color_to_file(outfile, ocean_color_2);
+		outfile << ocean_enabled << std::endl;
+		outfile << ocean_frequency << std::endl;
+		outfile << ocean_octaves << std::endl;
+		outfile << ocean_seed << std::endl;
 
 		outfile.close();
 	}
@@ -302,7 +379,7 @@ int main() {
 
 	// _____________________________________________________
 
-	terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+	terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, terrain_segments);
 	sky_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
 	ocean_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, 32);
 
@@ -325,30 +402,30 @@ int main() {
 
 			ImGui::Text("Geometry");
 
-			if (ImGui::SliderInt("Segments", &segments, 1, 200)) {
+			if (ImGui::SliderInt("Segments", &terrain_segments, 1, 200)) {
 				delete terrain_sphere;
-				terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, segments);
+				terrain_sphere = new Sphere(0.0f, 0.0f, 0.0f, 1.0f, terrain_segments);
 			}
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("The numbers of segment the mesh has.");
 
-			ImGui::SliderInt("Octaves", &octaves, 1, 10);
+			ImGui::SliderInt("Octaves", &terrain_octaves, 1, 10);
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("The numbers of sub-step iterations the procedural method has.");
 
-			ImGui::SliderInt("Seed", &seed, 0, 100);
+			ImGui::SliderInt("Seed", &terrain_seed, 0, 100);
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("Change seed to vary the noise.");
 
-			ImGui::SliderFloat("Vertex Frequency", &vert_frequency, 0.1f, 10.0f);
+			ImGui::SliderFloat("Vertex Frequency", &terrain_vert_frequency, 0.1f, 10.0f);
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("Frequency of the noise.");
 
-			ImGui::SliderFloat("Radius", &radius, 0.0f, 1.0f);
+			ImGui::SliderFloat("Radius", &terrain_radius, 0.0f, 1.0f);
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("Radius of the planet.");
 
-			ImGui::SliderFloat("Elevation", &elevation, 0.0f, 0.2f);
+			ImGui::SliderFloat("Elevation", &terrain_elevation, 0.0f, 0.2f);
 			if (show_tooltips && ImGui::IsItemHovered())
 				ImGui::SetTooltip("Maximum height of the mountains.");
 
@@ -357,16 +434,16 @@ int main() {
 			if (ImGui::BeginMenu("Colors")) {
 
 				ImGui::Text("Colors");
-				ImGui::SliderFloat("Color Frequency", &frag_frequency, 0.1f, 10.0f);
+				ImGui::SliderFloat("Color Frequency", &terrain_frag_frequency, 0.1f, 10.0f);
 				if (show_tooltips && ImGui::IsItemHovered())
 					ImGui::SetTooltip("Frequency of the noise.");
 
 				ImGui::Spacing();
-				ImGui::ColorEdit3("Deep color", color_deep);
-				ImGui::ColorEdit3("Beach color", color_beach);
-				ImGui::ColorEdit3("Grass color", color_grass);
-				ImGui::ColorEdit3("Mountain color", color_rock);
-				ImGui::ColorEdit3("Snow color", color_snow);
+				ImGui::ColorEdit3("Deep color", terrain_color_deep);
+				ImGui::ColorEdit3("Beach color", terrain_color_beach);
+				ImGui::ColorEdit3("Grass color", terrain_color_grass);
+				ImGui::ColorEdit3("Mountain color", terrain_color_rock);
+				ImGui::ColorEdit3("Snow color", terrain_color_snow);
 
 				ImGui::EndMenu();
 			}
@@ -445,15 +522,15 @@ int main() {
 			ImGui::Checkbox("Show tooltips", &show_tooltips);
 
 			if (ImGui::Button("Reset")) {
-				radius = 1.0f;
-				octaves = 6;
-				seed = 0;
+				terrain_radius = 1.0f;
+				terrain_octaves = 6;
+				terrain_seed = 0;
 
-				color_deep[0] = color_deep[1] = color_deep[2] = 1.0f;
-				color_beach[0] = color_beach[1] = color_beach[2] = 1.0f;
-				color_grass[0] = color_grass[1] = color_grass[2] = 1.0f;
-				color_rock[0] = color_rock[1] = color_rock[2] = 1.0f;
-				color_snow[0] = color_snow[1] = color_snow[2] = 1.0f;
+				terrain_color_deep[0] = terrain_color_deep[1] = terrain_color_deep[2] = 1.0f;
+				terrain_color_beach[0] = terrain_color_beach[1] = terrain_color_beach[2] = 1.0f;
+				terrain_color_grass[0] = terrain_color_grass[1] = terrain_color_grass[2] = 1.0f;
+				terrain_color_rock[0] = terrain_color_rock[1] = terrain_color_rock[2] = 1.0f;
+				terrain_color_snow[0] = terrain_color_snow[1] = terrain_color_snow[2] = 1.0f;
 
 				use_perlin = true;
 				rotation_degrees[0] = rotation_degrees[1] = 0.0f;
@@ -550,18 +627,18 @@ int main() {
 
 		glUniform1i(loc_terrain_method, noise_method);
 
-		glUniform1f(loc_radius, radius);
-		glUniform1f(loc_elevation, elevation);
-		glUniform1i(loc_seed, seed);
-		glUniform1i(loc_octaves, octaves);
-		glUniform1f(loc_vert_frequency, vert_frequency);
-		glUniform1f(loc_frag_frequency, frag_frequency);
+		glUniform1f(loc_radius, terrain_radius);
+		glUniform1f(loc_elevation, terrain_elevation);
+		glUniform1i(loc_seed, terrain_seed);
+		glUniform1i(loc_octaves, terrain_octaves);
+		glUniform1f(loc_vert_frequency, terrain_vert_frequency);
+		glUniform1f(loc_frag_frequency, terrain_frag_frequency);
 
-		glUniform3fv(loc_color_deep, 1, &color_deep[0]);
-		glUniform3fv(loc_color_beach, 1, &color_beach[0]);
-		glUniform3fv(loc_color_grass, 1, &color_grass[0]);
-		glUniform3fv(loc_color_rock, 1, &color_rock[0]);
-		glUniform3fv(loc_color_snow, 1, &color_snow[0]);
+		glUniform3fv(loc_color_deep, 1, &terrain_color_deep[0]);
+		glUniform3fv(loc_color_beach, 1, &terrain_color_beach[0]);
+		glUniform3fv(loc_color_grass, 1, &terrain_color_grass[0]);
+		glUniform3fv(loc_color_rock, 1, &terrain_color_rock[0]);
+		glUniform3fv(loc_color_snow, 1, &terrain_color_snow[0]);
 
 		terrain_sphere->render();
 
@@ -584,8 +661,8 @@ int main() {
 			glUniform1f(loc_light_intensity, light_intensity);
 			glUniform1f(loc_shininess, shininess);
 
-			glUniform1f(loc_ocean_radius, radius);
-			glUniform1f(loc_ocean_elevation, elevation);
+			glUniform1f(loc_ocean_radius, terrain_radius);
+			glUniform1f(loc_ocean_elevation, terrain_elevation);
 			glUniform1i(loc_ocean_seed, ocean_seed);
 			glUniform1f(loc_ocean_frequency, ocean_frequency);
 			glUniform1i(loc_ocean_octaves, ocean_octaves);
@@ -614,8 +691,8 @@ int main() {
 			time = (float)glfwGetTime();
 			glUniform1f(loc_sky_time, time);
 			glUniform1f(loc_sky_speed, sky_speed);
-			glUniform1f(loc_sky_radius, radius);
-			glUniform1f(loc_sky_elevation, elevation);
+			glUniform1f(loc_sky_radius, terrain_radius);
+			glUniform1f(loc_sky_elevation, terrain_elevation);
 			glUniform1i(loc_sky_seed, sky_seed);
 			glUniform1f(loc_sky_frequency, sky_frequency);
 			glUniform1i(loc_sky_octaves, sky_octaves);
