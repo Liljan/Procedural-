@@ -84,8 +84,8 @@ void list_files()
 	WIN32_FIND_DATA file_info;
 	HANDLE h_find;
 
-	std::string fullPath = "*" + FILE_ENDING;
-	h_find = FindFirstFile(fullPath.c_str(), &file_info);
+	std::string full_path = "*" + FILE_ENDING;
+	h_find = FindFirstFile(full_path.c_str(), &file_info);
 
 	file_info;
 
@@ -123,42 +123,42 @@ void load_file(std::string file_name)
 {
 	try
 	{
-		std::ifstream infile(file_name + FILE_ENDING, std::ifstream::binary);
+		std::ifstream in_file(file_name + FILE_ENDING, std::ifstream::binary);
 
 		// Noise
-		infile >> noise_method;
+		in_file >> noise_method;
 
 		// Sky
-		file_to_color(infile, sky_color);
-		infile >> sky_enabled;
-		infile >> sky_frequency;
-		infile >> sky_octaves;
-		infile >> sky_opacity;
-		infile >> sky_seed;
+		file_to_color(in_file, sky_color);
+		in_file >> sky_enabled;
+		in_file >> sky_frequency;
+		in_file >> sky_octaves;
+		in_file >> sky_opacity;
+		in_file >> sky_seed;
 
 		// Terrain
 
-		file_to_color(infile, terrain_color_beach);
-		file_to_color(infile, terrain_color_deep);
-		file_to_color(infile, terrain_color_grass);
-		file_to_color(infile, terrain_color_rock);
-		file_to_color(infile, terrain_color_snow);
-		infile >> terrain_elevation;
-		infile >> terrain_frag_frequency;
-		infile >> terrain_octaves;
-		infile >> terrain_radius;
-		infile >> terrain_seed;
-		infile >> terrain_segments;
-		infile >> terrain_vert_frequency;
+		file_to_color(in_file, terrain_color_beach);
+		file_to_color(in_file, terrain_color_deep);
+		file_to_color(in_file, terrain_color_grass);
+		file_to_color(in_file, terrain_color_rock);
+		file_to_color(in_file, terrain_color_snow);
+		in_file >> terrain_elevation;
+		in_file >> terrain_frag_frequency;
+		in_file >> terrain_octaves;
+		in_file >> terrain_radius;
+		in_file >> terrain_seed;
+		in_file >> terrain_segments;
+		in_file >> terrain_vert_frequency;
 
 		// Ocean
 
-		file_to_color(infile, ocean_color_1);
-		file_to_color(infile, ocean_color_2);
-		infile >> ocean_enabled;
-		infile >> ocean_frequency;
-		infile >> ocean_octaves;
-		infile >> ocean_seed;
+		file_to_color(in_file, ocean_color_1);
+		file_to_color(in_file, ocean_color_2);
+		in_file >> ocean_enabled;
+		in_file >> ocean_frequency;
+		in_file >> ocean_octaves;
+		in_file >> ocean_seed;
 
 		switch (noise_method)
 		{
@@ -180,7 +180,7 @@ void load_file(std::string file_name)
 			break;
 		}
 
-		infile.close();
+		in_file.close();
 		delete sky_sphere;
 		delete terrain_sphere;
 		delete ocean_sphere;
@@ -201,42 +201,42 @@ void save_file(std::string file_name) {
 
 	try
 	{
-		std::ofstream outfile(file_name + FILE_ENDING, std::ofstream::binary);
+		std::ofstream out_file(file_name + FILE_ENDING, std::ofstream::binary);
 
 		// Noise
-		outfile << noise_method << std::endl;
+		out_file << noise_method << std::endl;
 
 		// Sky
-		color_to_file(outfile, sky_color);
-		outfile << sky_enabled << std::endl;
-		outfile << sky_frequency << std::endl;
-		outfile << sky_octaves << std::endl;
-		outfile << sky_opacity << std::endl;
-		outfile << sky_seed << std::endl;
+		color_to_file(out_file, sky_color);
+		out_file << sky_enabled << std::endl;
+		out_file << sky_frequency << std::endl;
+		out_file << sky_octaves << std::endl;
+		out_file << sky_opacity << std::endl;
+		out_file << sky_seed << std::endl;
 
 		// Terrain
-		color_to_file(outfile, terrain_color_beach);
-		color_to_file(outfile, terrain_color_deep);
-		color_to_file(outfile, terrain_color_grass);
-		color_to_file(outfile, terrain_color_rock);
-		color_to_file(outfile, terrain_color_snow);
-		outfile << terrain_elevation << std::endl;
-		outfile << terrain_frag_frequency << std::endl;
-		outfile << terrain_octaves << std::endl;
-		outfile << terrain_radius << std::endl;
-		outfile << terrain_seed << std::endl;
-		outfile << terrain_segments << std::endl;
-		outfile << terrain_vert_frequency << std::endl;
+		color_to_file(out_file, terrain_color_beach);
+		color_to_file(out_file, terrain_color_deep);
+		color_to_file(out_file, terrain_color_grass);
+		color_to_file(out_file, terrain_color_rock);
+		color_to_file(out_file, terrain_color_snow);
+		out_file << terrain_elevation << std::endl;
+		out_file << terrain_frag_frequency << std::endl;
+		out_file << terrain_octaves << std::endl;
+		out_file << terrain_radius << std::endl;
+		out_file << terrain_seed << std::endl;
+		out_file << terrain_segments << std::endl;
+		out_file << terrain_vert_frequency << std::endl;
 
 		// Ocean
-		color_to_file(outfile, ocean_color_1);
-		color_to_file(outfile, ocean_color_2);
-		outfile << ocean_enabled << std::endl;
-		outfile << ocean_frequency << std::endl;
-		outfile << ocean_octaves << std::endl;
-		outfile << ocean_seed << std::endl;
+		color_to_file(out_file, ocean_color_1);
+		color_to_file(out_file, ocean_color_2);
+		out_file << ocean_enabled << std::endl;
+		out_file << ocean_frequency << std::endl;
+		out_file << ocean_octaves << std::endl;
+		out_file << ocean_seed << std::endl;
 
-		outfile.close();
+		out_file.close();
 	}
 	catch (const std::exception&)
 	{
@@ -246,21 +246,21 @@ void save_file(std::string file_name) {
 
 
 inline float degree_to_radians(float degree) {
-	return M_PI*degree / 180.0f;
+	return M_PI * degree / 180.0f;
 }
 
 
 int main() {
 	glfwContext glfw;
-	GLFWwindow* currentWindow = nullptr;
+	GLFWwindow* current_window = nullptr;
 
 	glfw.init(1920, 1080, "Procedural Planet Maker");
-	glfw.getCurrentWindow(currentWindow);
-	glfwSetInputMode(currentWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	glfwSetCursorPos(currentWindow, 1920 / 2, 1080 / 2);
+	glfw.getCurrentWindow(current_window);
+	glfwSetInputMode(current_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetCursorPos(current_window, 1920 / 2, 1080 / 2);
 
 	// Setup ImGui binding
-	ImGui_ImplGlfw_Init(currentWindow, true);
+	ImGui_ImplGlfw_Init(current_window, true);
 
 	//start GLEW extension handler
 	glewExperimental = GL_TRUE;
@@ -389,7 +389,7 @@ int main() {
 
 	// RENDER LOOP \__________________________________________/
 
-	while (!glfwWindowShouldClose(currentWindow))
+	while (!glfwWindowShouldClose(current_window))
 	{
 		glfwPollEvents();
 
@@ -551,7 +551,7 @@ int main() {
 
 				ImGui::SameLine();
 				if (ImGui::Button("Load")) {
-					std::string asses(load_buffer);
+					std::string load_as_string(load_buffer);
 					load_file(std::string(load_buffer));
 				}
 
@@ -575,17 +575,17 @@ int main() {
 		last_time = glfwGetTime();
 
 		//glfw input handler
-		input_handler(currentWindow, delta_time);
+		input_handler(current_window, delta_time);
 
-		if (glfwGetKey(currentWindow, GLFW_KEY_LEFT_CONTROL))
+		if (glfwGetKey(current_window, GLFW_KEY_LEFT_CONTROL))
 		{
 			if (!FPS_reset)
 			{
 				FPS_reset = true;
-				glfwSetCursorPos(currentWindow, 1920 / 2, 1080 / 2);
+				glfwSetCursorPos(current_window, 1920 / 2, 1080 / 2);
 			}
 
-			camera.fpsCamera(currentWindow, delta_time);
+			camera.fpsCamera(current_window, delta_time);
 		}
 		else
 		{
@@ -707,11 +707,11 @@ int main() {
 
 		// Rendering imgui
 		int display_w, display_h;
-		glfwGetFramebufferSize(currentWindow, &display_w, &display_h);
+		glfwGetFramebufferSize(current_window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
 		ImGui::Render();
 
-		glfwSwapBuffers(currentWindow);
+		glfwSwapBuffers(current_window);
 	}
 
 	ImGui_ImplGlfw_Shutdown();
