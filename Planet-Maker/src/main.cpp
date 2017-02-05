@@ -69,6 +69,7 @@ float sky_frequency = 4.0f;
 int sky_seed = 0;
 int sky_octaves = 6;
 float sky_color[3] = { 1.0f,1.0f,1.0f };
+float sky_opacity = 1.0f;
 
 Sphere* ocean_sphere;
 Sphere* terrain_sphere;
@@ -154,19 +155,9 @@ void save_file(std::string file_name) {
 	try
 	{
 		std::ofstream outfile(file_name + FILE_ENDING, std::ofstream::binary);
-		outfile << segments << std::endl;
-		outfile << elevation << std::endl;
-		outfile << radius << std::endl;
-		outfile << vert_frequency << std::endl;
-		outfile << octaves << std::endl;
-		outfile << seed << std::endl;
 
-		// colors
-		color_to_file(outfile, color_deep);
-		color_to_file(outfile, color_beach);
-		color_to_file(outfile, color_grass);
-		color_to_file(outfile, color_rock);
-		color_to_file(outfile, color_snow);
+		// Sky
+
 
 		outfile.close();
 	}
@@ -268,6 +259,7 @@ int main() {
 	GLint loc_sky_octaves = glGetUniformLocation(sky_shader.programID, "octaves");
 	GLint loc_sky_seed = glGetUniformLocation(sky_shader.programID, "seed");
 	GLint loc_sky_color = glGetUniformLocation(sky_shader.programID, "sky_color");
+	GLint loc_sky_opacity = glGetUniformLocation(sky_shader.programID, "opacity");
 
 	// __________ OCEAN ______________
 
@@ -386,6 +378,9 @@ int main() {
 				ImGui::Text("Clouds");
 				ImGui::Checkbox("Enable clouds", &sky_enabled);
 				ImGui::ColorEdit3("Color", sky_color);
+				ImGui::SliderFloat("Opacity", &sky_opacity, 0.0f, 1.0f);
+				ImGui::Spacing();
+
 				ImGui::SliderInt("Octaves", &sky_octaves, 1, 6);
 				ImGui::SliderFloat("Frequency", &sky_frequency, 0.01f, 10.0f);
 				ImGui::SliderInt("Seed", &sky_seed, 0, 10000);
@@ -625,6 +620,7 @@ int main() {
 			glUniform1f(loc_sky_frequency, sky_frequency);
 			glUniform1i(loc_sky_octaves, sky_octaves);
 			glUniform3fv(loc_sky_color, 1, &sky_color[0]);
+			glUniform1f(loc_sky_opacity, sky_opacity);
 
 			sky_sphere->render();
 		}

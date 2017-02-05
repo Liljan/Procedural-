@@ -465,6 +465,7 @@ uniform float speed;
 uniform int seed;
 uniform int octaves;
 uniform float frequency;
+uniform float opacity;
 
 uniform vec3 sky_color;
 
@@ -485,7 +486,7 @@ void main() {
 
   vec3 diffuse_color = sky_color;
 
-  float opacity;
+  float opac;
 
   float noise = generate_noise(frequency*vec3(pos + seed + 0.01 * speed * time));
 
@@ -495,12 +496,7 @@ void main() {
     noise += 1.0 / (pow(2, o)) * generate_noise((o + 1.0) * frequency * vec3(pos + seed + 0.01 * speed * time));
   }
 
-  opacity = noise;
-  //opacity = 0.3;
+  opac = noise;
 
- /* if(opacity < 0.1)
-    color = vec4(0.0,0.0,1.0,0.05);
-  else*/
-  //vec4 blue = vec4(0.0,0.0,0.5,0.3);
-  color = vec4(diffuse_color,opacity);
+  color = vec4(diffuse_color,opacity * opac);
 }
