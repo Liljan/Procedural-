@@ -487,12 +487,12 @@ void main() {
 
   float opacity;
 
-  float noise = generate_noise(frequency*vec3(pos + seed + 0.1 * speed * time));
+  float noise = generate_noise(frequency*vec3(pos + seed + 0.01 * speed * time));
 
   // 1th to (n-1):th octave
   for(float o = 1.0; o < octaves; o++)
   {
-    noise += 1.0 / (pow(2, o)) * generate_noise((o + 1.0) * frequency * vec3(pos + seed + 0.1 * speed * time));
+    noise += 1.0 / (pow(2, o)) * generate_noise((o + 1.0) * frequency * vec3(pos + seed + 0.01 * speed * time));
   }
 
   opacity = noise;

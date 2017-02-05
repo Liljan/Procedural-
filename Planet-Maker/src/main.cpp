@@ -390,7 +390,7 @@ int main() {
 				ImGui::SliderInt("Octaves", &sky_octaves, 1, 10);
 				ImGui::SliderFloat("Frequency", &sky_frequency, 0.01f, 10.0f);
 				ImGui::SliderInt("Seed", &sky_seed, 0, 10000);
-				ImGui::SliderFloat("Speed", &sky_speed, 0.0f, 2.0f);
+				ImGui::SliderFloat("Speed", &sky_speed, 0.0f, 10.0f);
 
 				ImGui::EndMenu();
 			}
