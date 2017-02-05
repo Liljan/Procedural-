@@ -10,10 +10,9 @@
 #include <sstream>
 
 #include "Shader.h"
-#include "MatrixStack.h"
 #include "Camera.h"
 #include "Sphere.h"
-#include "CustomPlane.h"
+#include "Plane.h"
 
 void input_handler(GLFWwindow* _window, double _dT);
 // void camera_handler(GLFWwindow* _window, double _dT, Camera* _cam);
@@ -75,7 +74,7 @@ Sphere* ocean_sphere;
 Sphere* terrain_sphere;
 Sphere* sky_sphere;
 
-std::vector<CustomPlane*> skybox;
+std::vector<Plane*> skybox;
 float scale = 100.0f;
 
 void list_files()
@@ -298,12 +297,12 @@ int main() {
 	Shader stars_shader;
 	stars_shader.createShader("shaders/star_vert.glsl", "shaders/star_frag.glsl");
 
-	skybox.push_back(new CustomPlane(scale, glm::vec3(0, 0, scale / 2.f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f))); // back
-	skybox.push_back(new CustomPlane(scale, glm::vec3(0, 0, -scale / 2.f), M_PI, glm::vec3(1.0f, 0.0f, 0.0f))); // front
-	skybox.push_back(new CustomPlane(scale, glm::vec3(0, scale / 2.f, 0.0f), -M_PI / 2.f, glm::vec3(1.0f, 0.0f, 0.0f))); // top
-	skybox.push_back(new CustomPlane(scale, glm::vec3(0, -scale / 2.f, 0.0f), M_PI / 2.f, glm::vec3(1.0f, 0.0f, 0.0f))); // bottom
-	skybox.push_back(new CustomPlane(scale, glm::vec3(scale / 2.f, 0.0f, 0.0f), M_PI / 2.f, glm::vec3(0.0f, 1.0f, 0.0f))); // right
-	skybox.push_back(new CustomPlane(scale, glm::vec3(-scale / 2.f, 0.0f, 0.0f), -M_PI / 2.f, glm::vec3(0.0f, 1.0f, 0.0f))); // left
+	skybox.push_back(new Plane(scale, glm::vec3(0, 0, scale / 2.f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f))); // back
+	skybox.push_back(new Plane(scale, glm::vec3(0, 0, -scale / 2.f), M_PI, glm::vec3(1.0f, 0.0f, 0.0f))); // front
+	skybox.push_back(new Plane(scale, glm::vec3(0, scale / 2.f, 0.0f), -M_PI / 2.f, glm::vec3(1.0f, 0.0f, 0.0f))); // top
+	skybox.push_back(new Plane(scale, glm::vec3(0, -scale / 2.f, 0.0f), M_PI / 2.f, glm::vec3(1.0f, 0.0f, 0.0f))); // bottom
+	skybox.push_back(new Plane(scale, glm::vec3(scale / 2.f, 0.0f, 0.0f), M_PI / 2.f, glm::vec3(0.0f, 1.0f, 0.0f))); // right
+	skybox.push_back(new Plane(scale, glm::vec3(-scale / 2.f, 0.0f, 0.0f), -M_PI / 2.f, glm::vec3(0.0f, 1.0f, 0.0f))); // left
 
 	GLint loc_P_stars = glGetUniformLocation(stars_shader.programID, "P"); // perspective matrix
 	GLint loc_V_stars = glGetUniformLocation(stars_shader.programID, "V"); // view matrix
@@ -387,7 +386,7 @@ int main() {
 				ImGui::Text("Clouds");
 				ImGui::Checkbox("Enable clouds", &sky_enabled);
 				ImGui::ColorEdit3("Color", sky_color);
-				ImGui::SliderInt("Octaves", &sky_octaves, 1, 10);
+				ImGui::SliderInt("Octaves", &sky_octaves, 1, 6);
 				ImGui::SliderFloat("Frequency", &sky_frequency, 0.01f, 10.0f);
 				ImGui::SliderInt("Seed", &sky_seed, 0, 10000);
 				ImGui::SliderFloat("Speed", &sky_speed, 0.0f, 10.0f);
@@ -403,7 +402,7 @@ int main() {
 				ImGui::Checkbox("Enable ocean", &ocean_enabled);
 				ImGui::ColorEdit3("Color 1", ocean_color_1);
 				ImGui::ColorEdit3("Color 2", ocean_color_2);
-				ImGui::SliderInt("Octaves", &ocean_octaves, 1, 10);
+				ImGui::SliderInt("Octaves", &ocean_octaves, 1, 6);
 				ImGui::SliderFloat("Frequency", &ocean_frequency, 0.01f, 10.0f);
 				ImGui::SliderInt("Seed", &ocean_seed, 0, 10000);
 

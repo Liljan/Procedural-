@@ -5,11 +5,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class CustomPlane
+class Plane
 {
 public:
-	CustomPlane(GLfloat skybox_scale, glm::vec3 position, float angle, glm::vec3 rotation);
-	~CustomPlane();
+	Plane(GLfloat skybox_scale, glm::vec3 position, float angle, glm::vec3 rotation);
+	~Plane();
 
 	void render();
 
