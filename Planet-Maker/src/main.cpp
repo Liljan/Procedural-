@@ -27,7 +27,7 @@ static char load_buffer[256] = "";
 static char save_buffer[256] = "";
 static char files_buffer[1024] = "";
 
-static const std::string FILE_ENDING = ".ass";
+static const std::string FILE_ENDING = ".txt";
 
 static glm::vec3* background_pos = new glm::vec3(0.0f, 0.0f, 3.0f);
 
