@@ -258,7 +258,7 @@ float snoise(vec3 v)
   vec3 p2 = vec3(a1.xy,h.z);
   vec3 p3 = vec3(a1.zw,h.w);
 
-//Normalise gradients
+// Normalise gradients
   vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
   p0 *= norm.x;
   p1 *= norm.y;
@@ -502,6 +502,7 @@ void main() {
   vec3 groundmix;
   vec3 mountainmix;
 
+  /*
   float noise = generate_noise(frag_frequency*vec3(pos + seed));
 
   // 1th to (n-1):th octave
@@ -509,6 +510,7 @@ void main() {
   {
     noise += 1.0 / (pow(2,o)) * generate_noise((o+1.0)*frag_frequency*vec3(pos + seed));
   }
+  */
 
   vec3 diffusecolor;
 
@@ -520,7 +522,6 @@ void main() {
   vec3 c_g = color_grass - 0.1 * generate_noise(1060.0 * pos + seed);
   vec3 c_r = color_rock - 0.3 * generate_noise(400.0 * pos + seed);
   vec3 c_s = color_snow - 0.1 * generate_noise(40.0 * pos + seed);
-
 
   float beach = smoothstep(0.0,0.1,height);
   float grass = smoothstep(0.0,0.3,height);
