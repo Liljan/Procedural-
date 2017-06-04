@@ -719,6 +719,15 @@ int main() {
 	delete terrain_sphere;
 	delete sky_sphere;
 
+	delete background_pos;
+	// delete the skybox
+	for (std::vector<Plane*>::iterator it = skybox.begin(); it != skybox.end(); ++it)
+	{
+		delete (*it);
+	}
+
+	skybox.clear();
+
 	return 0;
 }
 
