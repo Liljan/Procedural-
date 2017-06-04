@@ -395,7 +395,8 @@ int main() {
 
 		ImGui_ImplGlfw_NewFrame();
 		{
-			ImGui::Text("Procedural Planet Maker");
+			ImGui::Begin("Procedural Planet Maker");
+
 			ImGui::Separator();
 			ImGui::Text("Use CTRL + W,A,S,D to move camera \nfreely.");
 			ImGui::Separator();
@@ -570,6 +571,8 @@ int main() {
 				ImGui::EndMenu();
 			}
 		}
+
+		ImGui::End();
 
 		delta_time = glfwGetTime() - last_time;
 		last_time = glfwGetTime();
