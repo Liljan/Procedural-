@@ -494,7 +494,7 @@ float generate_noise(vec3 v)
 
 uniform float h = 0.0001;
 uniform float h_half = 0.00005;
-uniform float two_h_inv = 5000;
+uniform float h_inv = 10000;
 
 vec3 central_diff_gradient(vec3 pos)
 {
