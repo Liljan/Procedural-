@@ -193,12 +193,5 @@ void main() {
 
   float noise = cnoise(frequency*vec3(pos));
 
-  // 1th to (n-1):th octave
- /* for(float o = 1.0; o < 6; o++)
-  {
-    noise += 1.0 / (pow(2, o)) * cnoise((o + 1.0) * frequency * vec3(pos));
-  }*/
-
   color = vec4(step(0.8,noise)*diffusecolor,1.0);
-  //color = vec4(0.4,0.6,0.7,1.0);
 }

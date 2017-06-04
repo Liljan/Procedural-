@@ -16,6 +16,12 @@
 // https://github.com/ashima/webgl-noise
 //
 
+// Cellular noise ("Worley noise") in 3D in GLSL.
+// Copyright (c) Stefan Gustavson 2011-04-19. All rights reserved.
+// This code is released under the conditions of the MIT license.
+// See LICENSE file for details.
+// https://github.com/stegu/webgl-noise
+
 vec3 mod289(vec3 x)
 {
   return x - floor(x * (1.0 / 289.0)) * 289.0;
@@ -180,7 +186,6 @@ float pnoise(vec3 P, vec3 rep)
   return 2.2 * n_xyz;
 }
 
-
 // ____________ Simplex Noise ________________
 
 //
@@ -280,7 +285,6 @@ float snoise(vec3 v)
 // modern GPU. In any case, it beats any software
 // implementation of Worley noise hands down.
 
-// END OF SMART NOISE FUNCTIONS
 // Cellular noise ("Worley noise") in 3D in GLSL.
 // Copyright (c) Stefan Gustavson 2011-04-19. All rights reserved.
 // This code is released under the conditions of the MIT license.
@@ -488,27 +492,53 @@ float generate_noise(vec3 v)
     return cnoise(v);
 }
 
-void main(){
+uniform float h = 0.0001;
+uniform float h_half = 0.00005;
+uniform float two_h_inv = 5000;
 
+vec3 central_diff_gradient(vec3 pos)
+{
+  float grad_x = two_h_inv * generate_noise(pos + h_half * vec3(1.0,0.0,0.0) - generate_noise(pos + h_half * vec3(1.0,0.0,0.0)));
+  float grad_y = two_h_inv * generate_noise(pos + h_half * vec3(0.0,1.0,0.0) - generate_noise(pos + h_half * vec3(0.0,1.0,0.0)));
+  float grad_z = two_h_inv * generate_noise(pos + h_half * vec3(0.0,0.0,1.0) - generate_noise(pos + h_half * vec3(0.0,0.0,1.0)));
+
+  return vec3(grad_x,grad_y,grad_z);
+}
+
+vec3 displace_normal(vec3 pos, vec3 normal)
+{
+  /**
+  * Following the normal displacement method based on
+  * the Gram-Schmidt orthogonalization process.
+  */
+
+  vec3 grad = central_diff_gradient(pos);
+  vec3 grad_para = dot(grad,normal) * normal;
+  vec3 grad_ortho = grad - grad_para;
+
+  vec3 new_normal = normal - grad_ortho;
+  return normalize(new_normal);
+}
+
+void main()
+{
   // 0th octave
-  float elevation = generate_noise(vert_frequency*(Position + seed));
+  float elevation = generate_noise(vert_frequency * (Position + seed));
 
   // 1th to (n-1):th octave
   for(float o = 1.0; o < octaves; o++)
   {
-    elevation += 1.0 / (pow(2,o)) * generate_noise((o+1.0)*vert_frequency*(Position + seed));
+    elevation += 1.0 / (pow(2,o)) * generate_noise((o + 1.0) * vert_frequency * (Position + seed));
   }
   
-  //vec3 pos = Position + amp * Normal;
-  //pos += elevation * Normal * elevationModifier;
   pos = Position + radius * Normal;
   pos += elevation * Normal * elevationModifier;
 
-  //vec3 pos = Position + 0.01*Normal*sin(10.0*time+10.0*Position.y);
   gl_Position = (P * V * M) * vec4(pos, 1.0);
   camPos = mat3(V * M) * Position;
 
-  interpolatedNormal = mat3(V * M) * Normal; 
+  vec3 new_normal = displace_normal(pos, Normal);
+  interpolatedNormal = mat3(V * M) * new_normal;
   
   height = elevation;
 }

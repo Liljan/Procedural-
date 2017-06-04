@@ -23,6 +23,6 @@ void main(){
 
   gl_Position = (P * V * M) * vec4(pos, 1.0);
 
-  interpolatedNormal = mat3(V * M) * Normal;
+  interpolatedNormal = mat3(V * M) * normalize(Normal);
   cam_pos = mat3(V * M) * Position;
 }

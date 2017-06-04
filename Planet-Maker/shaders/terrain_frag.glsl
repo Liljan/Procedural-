@@ -483,8 +483,6 @@ uniform int noise_method;
 
 out vec4 color;
 
-// height ranges
-
 float generate_noise(vec3 v)
 {
 	// perlin
@@ -502,19 +500,9 @@ void main() {
   vec3 groundmix;
   vec3 mountainmix;
 
-  /*
-  float noise = generate_noise(frag_frequency*vec3(pos + seed));
-
-  // 1th to (n-1):th octave
-  for(float o = 1.0; o < octaves; o++)
-  {
-    noise += 1.0 / (pow(2,o)) * generate_noise((o+1.0)*frag_frequency*vec3(pos + seed));
-  }
-  */
-
   vec3 diffusecolor;
 
-  // height: from 0 to 1
+  // height: goes from 0 to 1
   float int_dir = 0.02;
 
   vec3 c_d = color_deep - 0.05 * generate_noise(1300.0 * pos + seed);

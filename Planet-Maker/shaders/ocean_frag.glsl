@@ -491,9 +491,7 @@ float generate_noise(vec3 v)
 void main() {
 
   vec3 diffuse_color;
-
   float opacity = 0.6;
-
   float noise = generate_noise(frequency * vec3(pos + seed));
 
   // 1th to (n-1):th octave
@@ -505,9 +503,9 @@ void main() {
   diffuse_color = mix(color_1, color_2, noise);
   diffuse_color = diffuse_color - 0.1 * generate_noise(800.0 * pos + seed);
 
-  vec3 kd = vec3(0.7,0.7,0.7);
-  vec3 ka = vec3(0.1,0.1,0.1);
-  vec3 ks = vec3(0.4,0.4,0.4);
+  vec3 kd = vec3(0.7, 0.7, 0.7);
+  vec3 ka = vec3(0.1, 0.1, 0.1);
+  vec3 ks = vec3(0.4, 0.4, 0.4);
 
   vec3 normal = normalize(interpolatedNormal);
   vec3 viewDir = normalize(cam_pos);
@@ -517,9 +515,9 @@ void main() {
 
   vec3 ambient = ka;
   vec3 diffuse = kd * max(dot(s,normal), 0.0);
-  vec3 specular = ks * pow( max( dot(r,viewDir),0.0 ) , shininess) * light_intensity;
+  vec3 specular = ks * pow( max( dot(r,viewDir), 0.0 ) , shininess) * light_intensity;
 
   vec3 diffuse_lighting = diffuse_color * (ka + kd);
 
-  color = vec4(diffuse_lighting + specular,opacity);
+  color = vec4(diffuse_lighting + specular, opacity);
 }

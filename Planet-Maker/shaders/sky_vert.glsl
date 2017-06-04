@@ -14,7 +14,8 @@ out vec3 interpolatedNormal;
 
 out vec3 pos;
 
-void main(){
+void main()
+{
   float height = 1.1* elevationModifier;
 
   pos = Position + radius * Normal;
@@ -22,5 +23,5 @@ void main(){
 
   gl_Position = (P * V * M) * vec4(pos, 1.0);
 
-  interpolatedNormal = mat3(V*M) * Normal;
+  interpolatedNormal = mat3(V * M) * normalize(Normal); 
 }
